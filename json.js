@@ -39,7 +39,7 @@ function first(){
 function Add_elem(type){
 	if (type == "text_area"){
 		ID_CT ++;
-		active.innerHTML += '<div id="outer'+ID_CT+'" class="text_area"><div id="'+ID_CT+'" class="slide_text" contenteditable="true">Type your own text here</div></div>';
+		active.innerHTML += '<div id="outer'+ID_CT+'" class="text_area"><div class="handle"></div><div id="'+ID_CT+'" class="slide_text" contenteditable="true">Type your own text here</div></div>';
 	 	for(i=1;i<=ID_CT;i++){		
 			$('#outer'+i).resizable();
 	                $('#outer'+i).resizable( "destroy" );

@@ -72,3 +72,10 @@ body {
 	border-style:dashed;
 	border-color:black;
 }
+.handle{
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 20px;
+	height: 20px;
+}
