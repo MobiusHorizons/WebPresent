@@ -6,22 +6,53 @@ var touchStartY = 0;
 var subElemCount=0;
 var level=0;
 var remote=false;
+var edit= true;
 var active=null;
 var background=null;
+var slide_background = "";
 var Remote_last="";
 var ID_CT =0;
+var savedHTML=null;
 var current=null;//new Array();
 //var aspect = 4/3 // 4:3
 var aspect = 16/9;
+
+function handleBackgroundSelect(evt){
+	var file = evt.target.files[0];
+	if (file.type.match('image.*')){
+		console.log(file.type);
+		var reader = new FileReader();
+		reader.onload = (function(theFile){
+			return function(e) {
+				slide_background = e.target.result;
+				set_slide_background();
+				console.log("background changed");
+			}
+		})(file);
+		reader.readAsDataURL(file);
+	}	
+}
+	
+function set_slide_background(){
+	active.style.backgroundImage="url("+slide_background+")";
+}
+
 function initialize(){
 	active = document.getElementById("slide_main");
+	if (savedHTML){
+		active.innerHTML = unescape(savedHTML);
+	}
 	if (slide_background){
 		active.style.backgroundImage="url("+slide_background+")";
 		active.style.backgroundSize="100% auto";
 	}
 	resize();
-
+	
+	document.getElementById('file').addEventListener('change',handleBackgroundSelect,false);
 	window.onresize=resize;
+	if (edit== true){
+		// placeholder for adding borders, and toolbar
+	}
 }
 
 function first(){
@@ -34,6 +65,38 @@ function first(){
 	if (window.fullScreenApi.supportsFullScreen) {
 		window.fullScreenApi.requestFullScreen(document.body);
 	}
+}
+
+function save_elem(){
+   if (localStorage){
+	localStorage.slide_background = slide_background;
+	localStorage.savedHTML = active.innerHTML;
+	localStorage.ID_CT = ID_CT;
+   }
+	var ud = document.createElement('script');
+	ud.innerHTML += "savedHTML = '" + escape(active.innerHTML) + "'\n";
+	ud.innerHTML +=  "slide_background = '"+slide_background+"'\n";
+	ud.innerHTML += "ID_CT = "+ID_CT+'\n';
+	document.body.insertBefore(ud,null);
+	console.log(ud);
+	//document.location = "data:text/html,"+ encodeURIComponent ("<html>" + document.getElementsByTagName('html')[0].innerHTML + "</html>");
+	
+	
+}
+
+function load_from_store(){
+   if (localStorage){
+	slide_background = localStorage.slide_background;
+	set_slide_background();
+	active.innerHTML = localStorage.savedHTML;
+	ID_CT = localStorage.ID_CT;
+	for(i=1;i<=ID_CT;i++){		
+		$('#outer'+i).resizable();
+		$('#outer'+i).resizable( "destroy" );
+		$('#outer'+i).resizable();
+		$('#outer'+i).draggable({snap:true, cancel: "div.slide_text"});
+	}
+    }
 }
 
 function Add_elem(type){
@@ -55,7 +118,7 @@ function Remote_Slide(){
 		console.log(data!=Remote_last);
 		if (data!=Remote_last){
 			Remote_last = data;
-			script='<script>'+data+'</script>';
+			//<!--='<script>'+data+'</script>';-->
 			$('body').append(script);
 			console.log("updated");
 		}
@@ -210,28 +273,15 @@ function resize()
 	winW = 630, winH = 460;
 	var slideH =winH, slideW = winW;
 	var background = $('#slide_screen');
-	/*if ( background && active.offsetWidth) {
-	 winW = active.offsetWidth;
-	 winH = active.offsetHeight;
-	}
-	if (document.compatMode=='CSS1Compat' &&
-		document.documentElement &&
-		document.documentElement.offsetWidth ) {
-	 winW = document.documentElement.offsetWidth;
-	 winH = document.documentElement.offsetHeight;
-	}
-	if (window.innerWidth && window.innerHeight) {
-	 winW = window.innerWidth();
-	 winH = window.innerHeight();
-	} 
-	if (document.documentElement){
-		winW = document.documentElement.clientWidth;
-		winH = document.documentElement.clientHeight;
-	}*/
 	if (background.innerHeight && background.innerWidth){
 		winW = background.innerWidth();
 		winH = background.innerHeight();
 	}
+	if (edit){
+		winW -=4;
+		winH -=4;
+	}
+		
 	if (winH * aspect < winW){ //put plack bars on sides
 		slideW = winH*aspect;
 		slideH = winH;

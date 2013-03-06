@@ -2,17 +2,15 @@ body {
 	padding:0px;
 	margin:auto;
 	font-size: 1em;
+	background: url("back.png");
+	overflow: none;
 } 
 #toolbar {
 	position:absolute;
 	float:left;
 	height:100%;
 	width: 20%;
-	background-color:grey;
-	margin:0px;
-	border-style:solid;
-	border-color:white;
-	border-width: 2px;
+	background:inherit;
 }
 .text_area{
 	left: 20px;
@@ -26,14 +24,14 @@ body {
 }
 
 #slide_screen{
-	height:100%;
-	width:80%;
+	height:98%;
+	width:79%;
+	top:1%;
 	left:20%;	
+	border-radius: 25px;
+	border: 2px solid gray;
 	position:absolute;
 	overflow:hidden;
-	border-style:solid;
-	border-color:white;
-	border-width: 2px;
 	background-color:black;
 }
 .slide {
@@ -42,8 +40,11 @@ body {
 	width:100%;
 	height:100%;
 	padding:0px;
-	background-color:gray;
-	
+	background-color:gray;	
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
 	border-width:2px;
 	border-color:white;
 	border-style:dashed;
