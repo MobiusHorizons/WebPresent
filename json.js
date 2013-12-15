@@ -25,14 +25,15 @@ function handleBackgroundSelect(evt){
 		reader.onload = (function(theFile){
 			return function(e) {
 				slide_background = e.target.result;
+				$('#modal-upload-img').attr('src', e.target.result);
 				set_slide_background();
 				console.log("background changed");
 			}
 		})(file);
 		reader.readAsDataURL(file);
-	}	
+	}
 }
-	
+
 function set_slide_background(){
 	active.style.backgroundImage="url("+slide_background+")";
 }
@@ -47,7 +48,7 @@ function initialize(){
 		active.style.backgroundSize="100% auto";
 	}
 	resize();
-	
+
 	document.getElementById('file').addEventListener('change',handleBackgroundSelect,false);
 	window.onresize=resize;
 	if (edit== true){
@@ -57,7 +58,7 @@ function initialize(){
 
 function first(){
 	count = 0;
-	subElemCount = 0; 
+	subElemCount = 0;
 	attatch_listeners();
 	current = slides[count];
 	hide();
@@ -80,8 +81,8 @@ function save_elem(){
 	document.body.insertBefore(ud,null);
 	console.log(ud);
 	//document.location = "data:text/html,"+ encodeURIComponent ("<html>" + document.getElementsByTagName('html')[0].innerHTML + "</html>");
-	
-	
+
+
 }
 
 function load_from_store(){
@@ -90,7 +91,7 @@ function load_from_store(){
 	set_slide_background();
 	active.innerHTML = localStorage.savedHTML;
 	ID_CT = localStorage.ID_CT;
-	for(i=1;i<=ID_CT;i++){		
+	for(i=1;i<=ID_CT;i++){
 		$('#outer'+i).resizable();
 		$('#outer'+i).resizable( "destroy" );
 		$('#outer'+i).resizable();
@@ -103,13 +104,25 @@ function Add_elem(type){
 	if (type == "text_area"){
 		ID_CT ++;
 		active.innerHTML += '<div id="outer'+ID_CT+'" class="text_area"><div class="handle"></div><div id="'+ID_CT+'" class="slide_text" contenteditable="true">Type your own text here</div></div>';
-	 	for(i=1;i<=ID_CT;i++){		
+	 	for(i=1;i<=ID_CT;i++){
 			$('#outer'+i).resizable();
 	                $('#outer'+i).resizable( "destroy" );
         	        $('#outer'+i).resizable();
                 	$('#outer'+i).draggable({snap:true, cancel: "div.slide_text"});
 		}
 	}
+}
+
+
+function UI_modal_file(caption){
+	var modal = UI_modal();
+	var fileUpload = document.createElement('input');
+	fileUpload.setAttribute("type","file");
+	fileUpload.setAttribute("id","file");
+	fileUpload.setAttribute("name","file");
+	modal.header.innerHTML = caption;
+	modal.content.appendChild(fileUpload);
+	
 }
 
 function Remote_Slide(){
@@ -176,7 +189,7 @@ function attatch_listeners(){
 		}
 	}, true);
 	active.addEventListener("touchmove", function(event){
-		if(event.targetTouches.length == 1){		
+		if(event.targetTouches.length == 1){
 			event.preventDefault();
 			//if(event.targetTouches[0].pageX-touchStartX >30){alert("swipe");}
 			touchLengthX = event.targetTouches[0].pageX-touchStartX;
@@ -194,7 +207,7 @@ function attatch_listeners(){
 	},true);
 	active.addEventListener("touchcancel", function(event){event.preventDefault;},true);
 }
-			
+
 function next(){
 	console.log("SubElemcount = " + subElemCount);
 	if ( count >= 0 && slides[count].subElem && subElemCount >= 0)
@@ -220,13 +233,13 @@ function next(){
 			load();
 		} else {
 			document.getElementById("slide_content").innerHTML = "<button style='font-size:1em;position:relative;height:10%; width: 16%; top:45%;left:42%' onclick='first();'>Replay</button>";
-	
+
 /*			if(ID){
 				jQuery.ajax({
 					type: 'GET',
 					url : "../put?id="+ID+"&ended=1",
 					success : function () {console.log("updated");}
-			
+
 				});
 			}*/
 			if(window.fullScreenApi.isFullScreen){window.fullScreenApi.cancelFullScreen(document.body);}
@@ -248,7 +261,7 @@ function load(){ //load element in current;
 			type: 'GET',
 			url : "../put?id="+ID+"&slide="+count+"&sub="+subElemCount,
 			success : function () {console.log("updated");}
-	
+
 		});
 	}
 	var tag = "", tagEnd = "";
@@ -261,8 +274,8 @@ function load(){ //load element in current;
 	};
 	if (current.content){
 		document.getElementById("slide_content").innerHTML+=tag+current.content+tagEnd;
-	}; 
-};	
+	};
+};
 
 
 
@@ -281,7 +294,7 @@ function resize()
 		winW -=4;
 		winH -=4;
 	}
-		
+
 	if (winH * aspect < winW){ //put plack bars on sides
 		slideW = winH*aspect;
 		slideH = winH;
@@ -305,39 +318,39 @@ function resize()
 }
 ////////////////////////////////////////////////////////////////////////
 (function() {
-	var 
-		fullScreenApi = { 
+	var
+		fullScreenApi = {
 			supportsFullScreen: false,
-			isFullScreen: function() { return false; }, 
-			requestFullScreen: function() {}, 
+			isFullScreen: function() { return false; },
+			requestFullScreen: function() {},
 			cancelFullScreen: function() {},
 			fullScreenEventName: '',
 			prefix: ''
 		},
 		browserPrefixes = 'webkit moz o ms khtml'.split(' ');
-	
+
 	// check for native support
 	if (typeof document.cancelFullScreen != 'undefined') {
 		fullScreenApi.supportsFullScreen = true;
-	} else {	 
+	} else {
 		// check for fullscreen support by vendor prefix
 		for (var i = 0, il = browserPrefixes.length; i < il; i++ ) {
 			fullScreenApi.prefix = browserPrefixes[i];
-			
+
 			if (typeof document[fullScreenApi.prefix + 'CancelFullScreen' ] != 'undefined' ) {
 				fullScreenApi.supportsFullScreen = true;
-				
+
 				break;
 			}
 		}
 	}
-	
+
 	// update methods to do something useful
 	if (fullScreenApi.supportsFullScreen) {
 		fullScreenApi.fullScreenEventName = fullScreenApi.prefix + 'fullscreenchange';
-		
+
 		fullScreenApi.isFullScreen = function() {
-			switch (this.prefix) {	
+			switch (this.prefix) {
 				case '':
 					return document.fullScreen;
 				case 'webkit':
@@ -351,10 +364,10 @@ function resize()
 		}
 		fullScreenApi.cancelFullScreen = function(el) {
 			return (this.prefix === '') ? document.cancelFullScreen() : document[this.prefix + 'CancelFullScreen']();
-		}		
+		}
 	}
 
 	// export api
-	window.fullScreenApi = fullScreenApi;	
+	window.fullScreenApi = fullScreenApi;
 })();
 /////////////////////////////////////////////////////////////////////////

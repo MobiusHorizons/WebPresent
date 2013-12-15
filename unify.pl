@@ -41,7 +41,7 @@ for (<IN>){
 #}
 if (m!<script.*src="([^"]+)"!){
 	my $content = `curl -f -s $1`;
-	s!(<script.*)src="[^"]+"(.*)></script>!$1 $2> $content </script>!;
+	s!(<script.*)src="[^"]+"(.*)>!<script > $content</script>!;
 }
 print $_;
 }
