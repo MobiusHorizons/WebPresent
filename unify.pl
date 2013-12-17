@@ -35,12 +35,24 @@ my $file = "./index.html";
 open (IN, $file);
 for (<IN>){
 
-#if (m!<link.*href="([^"]+)"!){
-#	my $content = `curl -f -s $1`;
-#	s/(<link.*)href="[^"]+"(.*)\/>/$1>$content<\/link>/;
-#}
+if (m!<link.*href="([^"]+)"!){
+	my $url = $1;
+	my $content;
+	if ($url =~ m!^(http)|(https)|(ftp)|(file)://!){
+		$content = `curl -f -s $url`;
+	} else {
+		$content =` cat $url`;
+	}
+	s!(<link.*)href="[^"]+"(.*)/>!<style>$content</style>!;
+}
 if (m!<script.*src="([^"]+)"!){
-	my $content = `curl -f -s $1`;
+	my $url = $1;
+	my $content;
+	if ($url =~ m!^(http)|(https)|(ftp)|(file)://!){
+		$content = `curl -f -s $url`;
+	} else {
+		$content = `cat $url`;
+	}
 	s!(<script.*)src="[^"]+"(.*)>!<script > $content</script>!;
 }
 print $_;

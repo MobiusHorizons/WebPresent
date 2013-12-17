@@ -1,17 +1,35 @@
+html {
+	height:100%;
+	width:100%;
+}
 body {
 	padding:0px;
-	margin:auto;
-	font-size: 1em;
+	/*margin:auto;*/
 	background: url("back.png");
-	overflow: none;
 } 
-#toolbar {
-	position:absolute;
-	float:left;
-	height:100%;
-	width: 20%;
-	background:inherit;
+
+*, *:before, *:after {
+  	-moz-box-sizing: border-box; 
+	-webkit-box-sizing: border-box; 
+	box-sizing: border-box;
 }
+
+
+#toolbar {
+	/*position:absolute;*/
+	width: 100%;
+	background:rgba(2,2,2,.5);
+	padding: 5px;
+}
+
+button{
+	background: #373;
+	color:#fff;
+	border-radius:10px;
+	border: 2px solid #000;
+	height:3em;
+}
+
 .text_area{
 	left: 20px;
 	top: 20px;
@@ -23,17 +41,26 @@ body {
 	width:10%;
 }
 
-#slide_screen{
-	height:98%;
-	width:79%;
-	top:1%;
-	left:20%;	
-	border-radius: 25px;
-	border: 2px solid gray;
+#container{
 	position:absolute;
-	overflow:hidden;
+	left:0px;
+	right:0px;
+	top:10%;
+	top:calc(3em );		
+	bottom:2px;
+}
+#slide_screen{
+	position:absolute;
+	top:0px;
+	bottom:0px;
+	left:0px;
+	right:0px;
+	border-radius: 5px;
+	border: 2px solid gray;
+	/*overflow:hidden;*/
 	background-color:black;
 }
+
 .slide {
 	border-radius: 15px;
 	position:absolute;
