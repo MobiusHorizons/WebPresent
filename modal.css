@@ -14,9 +14,6 @@
 /*
  * Configuration
  */
-html {
-  overflow-y: scroll;
-}
 
 .has-overlay {
   overflow: hidden;
