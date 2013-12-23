@@ -16,13 +16,13 @@ body {
 
 
 #toolbar {
-	/*position:absolute;*/
+	position:absolute;
 	width: 100%;
 	background:rgba(2,2,2,.5);
 	padding: 5px;
 }
 
-button{
+#toolbar button,select{
 	background: #373;
 	color:#fff;
 	border-radius:10px;
@@ -31,11 +31,11 @@ button{
 }
 
 .text_area{
-	left: 20px;
-	top: 20px;
+	//left: 20px;
+	//top: 20px;
 	border:2px dashed black;
 	height:2em;
-	margin:10px;
+	//margin:10px;
 	cursor:move;
 	overflow:hidden;
 	width:10%;
@@ -58,10 +58,9 @@ button{
 	left:0px;
 	right:0px;
 	border-radius: 5px;
-	border: 2px solid gray;
-	overflow:hidden;
+	overflow: hidden;
 	background-color:black;
-}
+	}
 
 .slide {
 	border-radius: 15px;
@@ -70,13 +69,11 @@ button{
 	height:100%;
 	padding:0px;
 	background-color:gray;	
-	-webkit-background-size: cover;
-	-moz-background-size: cover;
-	-o-background-size: cover;
-	background-size: cover;
-	border-width:2px;
-	border-color:white;
-	border-style:dashed;
+	background-repeat:no-repeat;
+	background-position: center;
+	background-origin:center;
+	background-size:cover;
+	border:2px dashed white;
 }
 
 .slide_text li{
@@ -99,9 +96,16 @@ button{
 	margin: 0px;	
 	/*padding:0px*/
 	text-align:center;
-	border-width:2px;
-	border-style:dashed;
-	border-color:black;
+	border-width:2px dashed black;
+}
+
+.slide_img {
+	height:100%;
+	width:100%;
+	background-repeat:no-repeat;
+	background-position: center;
+	background-origin:center;
+	background-size:cover;
 }
 
 .handle{
@@ -110,4 +114,28 @@ button{
 	left: 0px;
 	width: 20px;
 	height: 20px;
+}
+
+.menu{//context menu override;
+	min-width: 8em;
+	min-height: 1em;
+	height:auto;
+	background-color:#fff;
+	box-shadow: 1px 1px 1px #222;
+
+}
+.menu li{
+	padding-left:2em;
+	padding-right:2em;
+	padding-top:.5em;
+	padding-bottom:.5em;
+	font-family:"Ariel", sans-serif;
+	font-weight:400;
+	font-size:.6em;
+	list-style-type:none;
+}
+.menu li:hover{
+	background-color: #4A90D9;
+	color:white;
+	cursor:pointer;
 }
