@@ -1,0 +1,32 @@
+<html>
+	<head>
+		<script src="Archive.js"></script>
+		<script src="FileSaver.js"></script>
+	<body>
+		<input id='file' type='file' onchange="addfile()"></input>
+		<input type='text' id='filename' value="new.archive"></input>
+		<button onclick="download()" >Download</button><br>
+		<div id='contents' style = "width: 200px;border:1px solid black;"><center><b>Contents</b></center></div>
+		<br> Each file you add will be added to the archive, and when you press download, it will be downloaded. Procede to open it in <a href="read.html">this page</a> For the purposes of this demonstration it is better to use text files because you will be able to read them in the next step. This is, however, not necessary.
+<script>
+	var input = document.getElementById('file');
+	var a = new Archive();
+	function addfile(){
+		var file = input.files[0];
+		console.log(file);
+		a.add(file,file.name);
+		var contents = document.getElementById('contents');
+		contents.innerHTML = "<b><center>Contents</center></b>";
+		var list = a.list();
+		for (name in list){
+			contents.innerHTML += "<li>" + list[name] + "</li>"
+		}
+	}
+
+	function download(){
+		var b = a.getBlob();
+		saveAs(b,document.getElementById('filename').value);
+	}
+</script>
+</body>
+</html>

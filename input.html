@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+		<!--<link rel="stylesheet" type="text/css" href="jquery-ui/css/smoothness/jquery-ui-1.10.4.custom.min.css" />-->
+		<!--<link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />-->
+		<link rel="stylesheet" type="text/css" href="css/HTMLSlides.min.css" />
+		<!--<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.10.0/themes/base/jquery-ui.css" />
+		<script src="http://code.jquery.com/jquery-1.9.0.min.js"></script>	
+		<script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script> -->
+		<!--<script src="jquery-ui/js/jquery-1.10.2.js"></script>
+		<script src="jquery-ui/js/jquery-ui-1.10.4.custom.min.js"></script>-->
+		<script src="js/HTMLSlides.min.js"></script>
+
+	</head>
+	<body >
+		<div id="toolbar">
+			<center>
+			<button onclick="Add_elem('text_area');">textarea</button>
+			<button onclick="changeBG()">Background</button>
+			<!--<button onclick = "new Preview({type:'image'}).show()">Background</button>-->
+			<button onclick="Add_elem('image');">image</button>
+			<button onclick="save_elem();">Save</button>
+			<span class="fileUpload nav-button">
+				<div style="margin-top:calc(50% - .25em)">Load</div>
+				<input 
+					class='upload'
+					type='file' 
+					id='loadNEW' 
+					onchange="load_slideshow();">
+				</input>
+			</span>
+			<a onclick="preview()"><button>Preview</button></a>
+			<select onchange="updateAspect(this)" style="-moz-appearance:button-arrow-down">
+				<option value="1.777777778">16:9</option>
+				<option value="1.333333333">4:3</option>
+			</select>
+			</center>
+		</div>
+
+		<div id="container">
+			<div id="slide_screen" aria-labelledby="slide_screen" class="background">
+	
+				<div id="slide_main" class="slide">
+				</div>	
+			</div>
+		</div>
+		</selection>
+
+	<script>
+	initialize();</script>
+
+	</body>
+</html>
+			

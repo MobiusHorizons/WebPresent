@@ -13,63 +13,91 @@ var background=null;
 var slide_background = "";
 var Remote_last="";
 var ID_CT =0;
+var slideshow = null;
+var slide = null;
 var savedHTML=null;
 var current=null;//new Array();
 var lastSlideHash = "";
 //var aspect = 4/3 // 4:3
 var aspect = 16/9;
 var lastClick = {};
+var files = {};
 
 function updateAspect(sel){
 	aspect = sel.options[sel.selectedIndex].value;
 	resize();
 }
 
-function set_slide_background(){
-	active.style.backgroundImage="url("+slide_background+")";
+/*function set_slide_background(){
+	active.style.backgroundImage="url("+URL.createObjectURL(files["slide_BG"]) +")";
+	slide.setBackground(files["slide_BG"], files['slide_BG'].name);
 	document.getElementById('file').removeEventListener('change',handleBackgroundSelect,false);
-}
+}*/
 
 /**
  *set editing borders based on boolean
  */
 function borders(display){
 	if (display){
-		$('#slide_screen').css('border','2px solid gray');
-		$('.slide').css('border','2px dashed white');
-		$('.slide_text h2').css('border','2px dashed black');
-		$('.handle').css('background-color','rgba(0,0,0,.5)');
-		$('.text_area').css('border','2px dashed black');
+		lib.selID('slide_screen').style.border = '2px solid gray';
+		lib.foreach(lib.selClass('slide'), function(el){el.style.border = "2px dashed white"});
+		lib.foreach(lib.selClass('handle'), function(el){el.style.backgroundColor = 'rgba(0,0,0,.5)'});
+		lib.foreach(lib.selClass('text_area'), function(el){
+			el.style.border = '2px dashed white';
+			el.style.boxShadow = " 0 0 0.2em black, 0 0 0.2em black,0 0 0.2em gray"
+		});
+//		$('.slide_text h2').css('border','2px dashed black');
+//		$('.handle').css('background-color','rgba(0,0,0,.5)');
+//		$('.text_area').css('border','2px dashed white');
+//		$('.text_area').css('box-shadow', ' 0 0 0.2em black, 0 0 0.2em black,0 0 0.2em gray');
 	} else {
-		$('#slide_screen').css('border','none');
-		$('.slide').css('border','none');
-		$('.slide_text h2').css('border','none');
-		$('.handle').css('background-color','');
-		$('.text_area').css('border','none');
+		lib.selID('slide_screen').style.border = 'none';
+		lib.foreach(lib.selClass('slide'), function(el){el.style.border = "none"});
+		lib.foreach(lib.selClass('handle'), function(el){el.style.backgroundColor = ''});
+		lib.foreach(lib.selClass('text_area'), function(el){
+			el.style.border = 'none';
+		//	el.style.boxShadow = 'none';
+		});
+//		$('#slide_screen').css('border','none');
+//		$('.slide').css('border','none');
+//		$('.slide_text h2').css('border','none');
+//		$('.handle').css('background-color','');
+//		$('.text_area').css('border','none');
+//		$('.text_area').css('border-shaddow','');
 	}
 }
 
 /**
  * change from edit mode to display mode.
  */
-function view(){
-
-	if (window.fullScreenApi.supportsFullScreen) {
-                window.fullScreenApi.requestFullScreen(document.body);
-        }
+function view(preview){
+	var p = preview || false;
 	borders(false);
-	$('#toolbar').hide();
-	$('#container').css("top", "0px");
-	for (i=1;i<=ID_CT;i++){
-		$('#outer'+i).resizable( "destroy" );
-		$('#outer'+i).resizable('destroy');
-        	$('#outer'+i).draggable(false)
-		$('#outer'+i).attr("contentEditable", false);
+	if (!p){
+		UI.hide(lib.selID('toolbar'));
+		lib.selID('container').style.top = "0px";
+	//	$('#toolbar').hide();
+	//	$('#container').css("top", "0px");
 	}
-	active.removeEventListener('contextmenu',addItemMenu);
+	for (i=1;i<=ID_CT;i++){
+		UI.resizeable(lib.selID('outer' + i), 'remove');
+		UI.draggable(lib.selID('outer' + i), 'remove');
+		//$('#outer'+i).resizable('destroy');
+        	//$('#outer'+i).draggable('destroy')
+		lib.selID('outer'+i).setAttribute('contenteditable',false);
+//		$('#outer'+i).attr("contenteditable", false);
+	}
+	if (!p){
+		active.removeEventListener('contextmenu',addItemMenu);
+	
+		edit = false;
+		resize();
+	}
+}
 
-	edit = false;
-	resize();
+function preview(){
+	document.body[window.getRFS()]();
+	location.hash = '/view';
 }
 
 function boxDrag(event, ui){
@@ -81,22 +109,34 @@ function boxDrag(event, ui){
 	event.target.width = (event.target.clientWidth/winW);
 }
 
-function setEdit(){
+function setEdit(preview){
+	var p = preview || false;
 	borders(true);
-        $('#toolbar').show();
-	var btnHeight = $('button').css('height');
-	var tbarPad = $('#toolbar').css('padding');
-        $('#container').css("top",$('#toolbar').outerHeight() + "px" );
-	console.log($('#container').css("top"));
+        if (!p){
+		UI.show(lib.selID('toolbar'));
+		lib.selID('container').style.top = lib.selID('toolbar').offsetHeight + "px";
+        	//$('#toolbar').show();
+//		var btnHeight = $('button').css('height');
+//		var tbarPad = $('#toolbar').css('padding');
+//        	$('#container').css("top",$('#toolbar').outerHeight() + "px" );
+//		console.log($('#container').css("top"));
+	}
         for (i=1;i<=ID_CT;i++){
-                $('#outer'+i).resizable( );
-                $('#outer'+i).draggable({snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
-                $('#outer'+i).attr("contentEditable", true);
-		$('#outer'+i).on('dragstop',function(event, ui){console.log(event);console.log(ui)});
+		
+                //$('#outer'+i).resizable( );
+                //$('#outer'+i).draggable({snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
+                //$('#outer'+i).attr("contenteditable", true);
+//		$('#outer'+i).on('dragstop',function(event, ui){console.log(event);console.log(ui)});
+		UI.resizeable(lib.selID('outer' + i), 'set');
+		UI.draggable(lib.selID('outer' + i), 'set');
+		lib.selID('outer'+i).setAttribute('contenteditable',false);
+		lib.selID('outer'+i).ondragstop = boxDrag;
         }
-	active.addEventListener('contextmenu',addItemMenu);
-        edit = true;
-        resize();
+	if (!p){
+		active.addEventListener('contextmenu',addItemMenu);
+        	edit = true;
+	        resize();
+	}
 
 }
 
@@ -172,6 +212,9 @@ function getDefaultFontSize(parentElement)
 }
 
 function initialize(){
+	slideshow = new SlideShow();
+	slide = new Slide();
+	slide = slideshow.addSlide(slide);
 	active = document.getElementById("slide_main");
 	if (savedHTML){
 		active.innerHTML = unescape(savedHTML);
@@ -184,13 +227,17 @@ function initialize(){
 	resize();
 
 	window.onresize=resize;
-	if (edit== null){
+	if (edit== null || edit == true){
 		setEdit();
 		window.location.hash = "#/edit";
 		// placeholder for adding borders, and toolbar
 		active.addEventListener('contextmenu',addItemMenu);
+	} else {
+		view();
+		window.location.hash = "#/view";
 	}
-	window.addEventListener('hashchange',route);
+	//window.addEventListener('hashchange',route);
+	window.onhashchange = route;
 }
 
 function first(){
@@ -201,7 +248,8 @@ function first(){
 	hide();
 	load();
 	if (window.fullScreenApi.supportsFullScreen) {
-		window.fullScreenApi.requestFullScreen(document.body);
+	//	window.fullScreenApi.requestFullScreen(document.body);
+		 
 	}
 }
 
@@ -218,13 +266,9 @@ function save_elem(){
 	ud.innerHTML += "edit = false;";
 	document.head.appendChild(ud);
 	console.log(ud);
-	view();
-	saveAs(
-    		 new Blob(
-          		[(new XMLSerializer).serializeToString(document)]
-        		, {type: "text/html;charset=" + document.characterSet}
-    		)
-    		, "document.html"
+	//view();
+	saveAs( slideshow.save()
+    		, "slideshow.shw"
 	);
 	//window.location = "data:text/html,"+ encodeURIComponent (document.getElementsByTagName('html')[0].outerHTML );
 
@@ -244,34 +288,86 @@ function load_from_store(){
 }
 
 function changeBG(){
-	clear_UI_modal();
-	document.getElementById('file').addEventListener('change',handleBackgroundSelect,false);
-	window.location.hash = "#modal-upload";
+	var bgChooser = new Preview(
+		{
+			type: 'image',
+			title : "Please choose a Background Image",
+		});
+	bgChooser.onselected = function(file){ 
+		console.log("onselected");
+		if (file == undefined)
+			return false;
+		console.log(file);
+		active.style.backgroundImage="url("+URL.createObjectURL(file) +")";
+        	slide.setBackground(file,file.name); 
+		return true;
+	};
+	bgChooser.show();		
 }
 
-function handleBackgroundSelect(evt){
+/*function handleBackgroundSelect(evt){
 	var file = evt.target.files[0];
-	if (file.type.match('image.*')){
+	files["slide_BG"]=file;
+	console.log(file);
+	$('#modal-upload-img').attr('src', URL.createObjectURL(file));	
+	set_slide_background();
+/*	if (file.type.match('image.*')){
 		console.log(file.type);
 		var reader = new FileReader();
 		reader.onload = (function(theFile){
 			return function(e) {
+				console.log(e);
 				slide_background = e.target.result;
 				$('#modal-upload-img').attr('src', e.target.result);
 				set_slide_background();
 				console.log("background changed");
 			}
 		})(file);
-		reader.readAsDataURL(file);
+		reader.readAsBinary(file);
+	}*/
+//}
+
+function image_CB(img, elem){
+	var fun = function(evt){
+   		var file = evt.target.files[0];
+        	if (file.type.match('image.*')){
+			//$('#modal-upload-img').attr('src', URL.createObjectURL(file));	
+			img.style.backgroundImage = 'url(' + URL.createObjectURL(file) + ')';
+               		console.log(file.type);
+			elem.links = [];
+			elem.links.push("img.style.backgroundImage",file.name);
+			var rl = {'resource' : file,
+				  'link' : {
+					'type': 'css',
+					'id'  : 'childNodes.1.style.backgroundImage'
+					}
+				};
+
+			slide.add(elem,'image',[rl]);
+			document.getElementById('file').addEventListener('change',fun,false);
+
+/*               		var reader = new FileReader();
+               		reader.onload = (function(theFile){
+                       		return function(e) {
+                               		$('#modal-upload-img').attr('src', e.target.result);
+					img.style.backgroundImage = 'url(' + e.target.result + ')';
+                    		}
+                	})(file);
+                	reader.readAsDataURL(file);
+*/
+        	}		
 	}
+	document.getElementById('file').addEventListener('change',fun,false);
 }
+
 
 function Add_elem(type){
 	if (type == "text_area"){
-		ID_CT ++;
+		ID_CT = slide.nextID();
 		var textArea = document.createElement('div');
 			textArea.setAttribute('id','outer' + ID_CT);
 			textArea.setAttribute('class','text_area');
+		UI.draggable(textArea, 'set');
 		var handle = document.createElement('div');
 			handle.setAttribute('class','handle');
 			textArea.appendChild(handle);
@@ -285,23 +381,15 @@ function Add_elem(type){
 		active.appendChild(textArea);
 		textArea.style.top = lastClick.y + 'px';
 		textArea.style.left = lastClick.x + 'px';
+		UI.resizeable(textArea,'set');
+		UI.draggable(textArea,'set');
+		textArea.ondragstop = boxDrag;
+		slide.add(textArea,'text',[]);
 
-		/*		active.innerHTML += '<div id="outer'+ID_CT+'" class="text_area">
-					<div class="handle"></div>
-					<div id="'+ID_CT+'" class="slide_text" contenteditable="true">
-						Type your own text here
-					</div>
-				</div>';*/
-	 	for(i=1;i<=ID_CT;i++){
-			$('#outer'+i).resizable();
-	                $('#outer'+i).resizable( "destroy" );
-        	        $('#outer'+i).resizable();
-                	$('#outer'+i).draggable({snap:'.text_area, #slide_main', snapMode:'outer', cancel: "div.slide_text"});
-			$('#outer'+i).on('dragstop',boxDrag);
-		}
+		borders(true);
 	return textArea;
 	} else if (type == "image"){
-		ID_CT ++;
+		ID_CT = slide.nextID();
 		var textArea = document.createElement('div');
 			textArea.setAttribute('id','outer' + ID_CT);
 			textArea.setAttribute('class','text_area');
@@ -312,45 +400,88 @@ function Add_elem(type){
 				img.setAttribute('id',ID_CT);
 				img.setAttribute('class','slide_text slide_img');
 				textArea.appendChild(img);
+		UI.resizeable(textArea,'set');
+		UI.draggable(textArea,'set');
+		textArea.ondragstop = boxDrag;
+
+		textArea.style.top = lastClick.clientY + 'px';
+		textArea.style.left = lastClick.clientX + 'px';
+/*		for(i=1;i<=ID_CT;i++){
+			UI.resizeable(lib.selID('outer' + i), 'set');
+			UI.draggable(lib.selID('outer' + i), 'set', {snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
+			lib.selID(i).setAttribute('contenteditable',true);
+			lib.selID('outer'+i).ondragstop = boxDrag;
+			//	$('#outer'+i).resizable();
+			//	$('#outer'+i).resizable( "destroy" );
+			//	$('#outer'+i).resizable();
+                	//	$('#outer'+i).draggable({snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
+			//	$('#outer'+i).on('dragstop',boxDrag);
+		}*/
+		//clear_UI_modal();
+		var image_preview = new Preview({type:'image'});
+		image_preview.onselected = function(file){
+			img.style.backgroundImage = 'url(' + URL.createObjectURL(file) + ')';
+               		console.log(file.type);
+			textArea.links = [];
+			textArea.links.push("img.style.backgroundImage",file.name);
+			var rl = {'resource' : file,
+				  'link' : {
+					'type': 'css',
+					'id'  : 'childNodes.1.style.backgroundImage'
+					}
+				};
+
+			slide.add(textArea,'image',[rl]);
+			active.appendChild(textArea);
+			borders(true);
+		}
+		image_preview.show();
+		return textArea;
+	} else if (type == "video"){
+		ID_CT ++;
+		var textArea = document.createElement('div');
+			textArea.setAttribute('id','outer' + ID_CT);
+			textArea.setAttribute('class','text_area');
+		var handle = document.createElement('div');
+			handle.setAttribute('class','handle');
+			textArea.appendChild(handle);
+		var img = document.createElement('video');
+				img.setAttribute('id',ID_CT);
+				img.setAttribute('class','slide_text slide_img');
+				img.setAttribute('controls',true);
+				textArea.appendChild(img);
 	
 		active.appendChild(textArea);
 		textArea.style.top = lastClick.y + 'px';
 		textArea.style.left = lastClick.x + 'px';
-		for(i=1;i<=ID_CT;i++){
-				$('#outer'+i).resizable();
-				$('#outer'+i).resizable( "destroy" );
-				$('#outer'+i).resizable();
-                		$('#outer'+i).draggable({snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
-				$('#outer'+i).on('dragstop',boxDrag);
-		}
-		clear_UI_modal();
-		document.getElementById('file').addEventListener('change',function(evt){
+/*		for(i=1;i<=ID_CT;i++){
+			UI.resizeable(lib.selID('outer' + i), 'set');
+			UI.draggable(lib.selID('outer' + i), 'set', {snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
+			lib.selID(i).setAttribute('contenteditable',true);
+			lib.selID('outer'+i).ondragstop = boxDrag;
+//				$('#outer'+i).resizable();
+//				$('#outer'+i).resizable( "destroy" );
+//				$('#outer'+i).resizable();
+//              		$('#outer'+i).draggable({snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
+//				$('#outer'+i).on('dragstop',boxDrag);
+		}*/
+		//		clear_UI_modal();
+		var fun =function(evt){
    			var file = evt.target.files[0];
-        		if (file.type.match('image.*')){
-                		console.log(file.type);
-                		var reader = new FileReader();
-                		reader.onload = (function(theFile){
-                        		return function(e) {
-                                		$('#modal-upload-img').attr('src', e.target.result);
-						img.style.backgroundImage = 'url(' + e.target.result + ')';
-                        		}
-                		})(file);
-                		reader.readAsDataURL(file);
-        		}		
-		},false);
+			files.video = file;
+			img.src = URL.createObjectURL(file);
+			document.getElementById('file').removeEventListener('change',fun);
+			
+			//img.setAttribute('src',URL.createObjectURL(file));
+		}
+		document.getElementById('file').addEventListener('change',fun);
 		window.location.hash = "#modal-upload";
 		console.log(textArea);
+		borders(true);
 		return textArea;
 	}
 	return null;
 }
-
-function clear_UI_modal(){
-		document.getElementById('file').value = "";
-		document.getElementById('file').files = [];
-		$('#modal-upload-img').attr('src',"");
-}
-
 
 function UI_modal_file(caption){
 	var modal = UI_modal();
@@ -361,6 +492,16 @@ function UI_modal_file(caption){
 	modal.header.innerHTML = caption;
 	modal.content.appendChild(fileUpload);
 	
+}
+
+function load_slideshow(){
+        var s = document.getElementById('slide_main');
+	s.innerHTML = "";
+	slideshow.load(document.getElementById('loadNEW').files[0], function(){
+		slide = slideshow.slides[0];
+		ID_CT = slide.ID_CT;
+		slideshow.slides[0].render(s);
+	});
 }
 
 function Remote_Slide(){
@@ -480,7 +621,9 @@ function next(){
 
 				});
 			}*/
-			if(window.fullScreenApi.isFullScreen){window.fullScreenApi.cancelFullScreen(document.body);}
+			if(window.fullScreenApi.isFullScreen){
+				//window.fullScreenApi.cancelFullScreen(document.body);
+			}
 		}
 	}
 
@@ -528,10 +671,11 @@ function resize( event )
 	}
 	winW = 630, winH = 460;
 	var slideH = winH, slideW = winW;
-	var background = $('#slide_screen');
-	if (background.innerHeight && background.innerWidth){
-		winW = background.innerWidth();
-		winH = background.innerHeight();
+	var background = lib.selID('slide_screen');
+	//var background = $("#slide_screen");
+	if (background.clientHeight && background.clientWidth){
+		winW = background.clientWidth;
+		winH = background.clientHeight;
 	}
 
 	if (winH * aspect < winW){ //put plack bars on sides
@@ -551,11 +695,12 @@ function resize( event )
 	active.style.left = ((winW-slideW) / 2) + "px";
 	active.style.height = slideH + "px";
 	active.style.top = ( (winH-slideH)/2) + "px";
-	var margins = ".03";//document.getElementByTag('slide_text')[0].style.margin;
+	//var margins = ".03";//document.getElementByTag('slide_text')[0].style.margin;
 	//var textHeight = (slideW)/1024 * 30 + "px";
 	var textWidth = 2 * (slideW/1024)  + 'em';
-	console.log("textWidth = "+textWidth);
+//	console.log("textWidth = "+textWidth);
 	active.style.fontSize=textWidth;
+	console.log(active);
 	winW = slideW;
 	winH = slideH;
 	var floats = document.getElementsByClassName('text_area');

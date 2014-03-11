@@ -1,0 +1,22 @@
+{
+  "name": "HTMLSlides",
+  "version": "0.1.0",
+  "description": "Slideshow program in HTML5",
+  "main": "gruntfile.js",
+  "dependencies": {
+    "grunt": "~0.4.2"
+  },
+  "devDependencies": {
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt": "~0.4.2",
+    "grunt-contrib-uglify": "~0.3.2",
+    "grunt-embed": "~0.1.0",
+    "grunt-contrib-cssmin": "~0.7.0",
+    "grunt-image-embed": "~0.3.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Paul Martin",
+  "license": "GPL"
+}

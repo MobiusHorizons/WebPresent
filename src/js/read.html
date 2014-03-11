@@ -1,0 +1,136 @@
+<html>
+	<head>
+		<style>
+			*, *:before, *:after {
+				-moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+ 			}
+			
+			body , html{
+				height:100%;
+				width:100%;
+				padding:0px;
+				margin: 0px;
+			}
+	
+			#container{
+				position:absolute;
+				bottom:0px;
+				top:0px;
+				left:0px;
+				right:0px;
+				overflow:hide;
+			}
+
+			#contents {
+				padding:.5em;
+				margin:.5em;
+				float:left;
+				height: calc( 100% - 1em);
+				min-width: 200px;
+				display:inline;
+			}
+			#show{
+				position:absolute;
+				margin:.5em;
+				padding:.5em;
+				float:left;
+				display:inline;
+				height: calc( 100% - 1em);
+				word-wrap:break-word;
+				overflow-y:auto;
+				overflow-x:hidden;
+				border: 1px black solid;
+			}
+			.img{
+				background-repeat: no-repeat;
+				background-size:contain;
+				background-position:center;
+			}
+		</style>
+		<script src="Blob.js/Blob.js"></script>
+		<script src="Archive.js"></script>
+	<body>
+		<div id="container">
+		<div id='contents' style = "border:1px solid black;">
+			<input id='file' type='file' onchange="addfile()">Open Archive</input>
+			<center><b>Contents</b></center></div>
+		<textarea id='show'>open the file you downloaded in the previous step, and click on one of the files (preferably a text file) to have it show up here.</textarea>
+		</div>
+<script>
+	var input = document.getElementById('file');
+	var container = document.getElementById('container');
+	var a = new Archive();
+	function addfile(){
+		var file = input.files[0];
+		console.log(file);
+		a.load(file,function(){
+			var contents = document.getElementById('contents');
+			contents.innerHTML = "<b><center>Contents</center></b>";
+			var list = a.list();
+			for (name in list){
+				var li = document.createElement('li');
+				li.onclick = function(e){show(e)};
+				li.innerHTML = "<a href='#' id='"+name+"'>" + list[name] + "</a>"
+				contents.appendChild(li);
+			}
+			resize();
+		});
+	}
+
+	function show( e ){
+		console.log(e);
+		var idx = e.target.id;
+		var show = document.getElementById('show');
+		var name = a.list()[idx];
+		var b = a.get(name);
+		// clear contents.
+		if (document.getElementById('show'))
+			container.removeChild(show);
+		if (b.type.match('text/')){
+			var t = document.createElement('textarea');
+			t.id = 'show';
+			show = container.appendChild(t);
+			Archive.read_String(b,function(data){
+				show.value = data;
+				resize();
+			});
+		} else if (b.type.match('image/')){
+			var i = document.createElement('img');
+			i.id = 'show'
+			i.classList.add('img');
+			i.style.backgroundImage = 'url('+ URL.createObjectURL(b) +')';
+			show = container.appendChild(i);
+			resize();
+		} else if (b.type.match('video/')){
+			var v = document.createElement('video');
+			v.id = "show";
+			v.controls = true;
+			v.src = URL.createObjectURL(b);
+			show = container.appendChild(v);
+			resize();
+		} else {
+			var t = document.createElement('div');
+			t.id = 'show';
+			show = container.appendChild(t);
+			Archive.read_String(b,function(data){
+				show.innerHTML =data;
+				resize();
+			});
+		}
+		resize();
+			
+			
+				
+	}
+
+	function resize(){
+		var width = contents.clientWidth;
+		document.getElementById('show').style.width = "calc( 100% - (3em + " + width+"px) )";
+	}
+
+	window.onresize = resize;
+	window.onload = resize();
+
+</script>
+</body>
+</html>

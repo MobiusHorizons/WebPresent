@@ -1,0 +1,78 @@
+.Preview.background{
+     position: absolute;
+     left: 0px;
+     top: 0px;
+     width:100%;
+     height:100%;
+     text-align:center;
+     background-color: rgba(0,0,0,.7);
+     z-index: 1000;
+}
+
+.Preview.background:before{
+	content:'';
+	display:inline-block;
+	height: 100%;
+	vertical-align:middle;
+	margin-right:-0.25em;
+}
+
+
+.Preview.modal{
+	position: relative;
+	display:inline-block;
+	vertical-align:middle;
+	width: 50%;
+	min-height: 50%;
+     	background-color: #fff;
+     	border:1px solid #000;
+	border-radius: .5em;
+	text-align: left;
+	padding-bottom: 2.5em; /* make room for buttons */
+}
+
+.Preview.modal-buttons{
+	position: absolute;
+	width: 100%;
+	height: 3em;
+	text-align: right;
+	border-top: 1px gray solid;
+	background-color: #EEE;
+	bottom: 0px;
+	padding-right: 1em;
+	padding-left: 1em;
+	border-radius: 0 0 .5em .5em;	
+}
+
+header.Preview{
+    width: 100%;
+    border-bottom: 1px gray solid;
+    background-color: #EEE;
+    text-align: center;
+    font-size: 1.5em;
+    height: calc( 2.5em / 1.5 );
+    font-weight: 500;
+    font-family: Georgia;
+    border-radius: .5em .5em 0px 0px;
+}
+input.Preview{
+    width: 100%;
+    padding: .25em;
+    border-bottom: 1px gray solid;
+}
+button.Preview{
+	margin:.25em;
+}
+
+.Preview.Image {
+	background-repeat:no-repeat
+	background-position:center center;
+	background-origin:center;
+	background-size:cover;
+}
+
+.Preview.preview{
+	width: 100%;
+	height: 25em;
+}
+
