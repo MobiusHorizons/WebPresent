@@ -58,7 +58,7 @@ UI.resizeable.mousedown = function(elem, e){
 		elem.resizeableOffsetY = undefined; 
 		elem.resizeableWidth = undefined; 
 		elem.resizeableHeight = undefined; 
-		elem.ondragstop(e);
+		elem.ontransformed({target:elem});
 	}
 	console.log(elem.draggableOffsetX +":"+ elem.draggableOffsetY);
 }

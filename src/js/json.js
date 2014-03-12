@@ -130,7 +130,7 @@ function setEdit(preview){
 		UI.resizeable(lib.selID('outer' + i), 'set');
 		UI.draggable(lib.selID('outer' + i), 'set');
 		lib.selID('outer'+i).setAttribute('contenteditable',false);
-		lib.selID('outer'+i).ondragstop = boxDrag;
+		lib.selID('outer'+i).ontransformed = boxDrag;
         }
 	if (!p){
 		active.addEventListener('contextmenu',addItemMenu);
@@ -383,7 +383,7 @@ function Add_elem(type){
 		textArea.style.left = lastClick.x + 'px';
 		UI.resizeable(textArea,'set');
 		UI.draggable(textArea,'set');
-		textArea.ondragstop = boxDrag;
+		textArea.ontransformed = boxDrag;
 		slide.add(textArea,'text',[]);
 
 		borders(true);
@@ -402,7 +402,7 @@ function Add_elem(type){
 				textArea.appendChild(img);
 		UI.resizeable(textArea,'set');
 		UI.draggable(textArea,'set');
-		textArea.ondragstop = boxDrag;
+		textArea.ontransformed = boxDrag;
 
 		textArea.style.top = lastClick.clientY + 'px';
 		textArea.style.left = lastClick.clientX + 'px';

@@ -27,7 +27,7 @@ UI.draggable.mousedown = function(elem, e){
 		window.onmousemove = old.mov; window.onmouseup = old.up;
 		elem.draggableOffsetX = undefined; 
 		elem.draggableOffsetY = undefined; 
-		elem.ondragstop(e);
+		elem.ontransformed({target: elem});
 	}
 	console.log(elem.draggableOffsetX +":"+ elem.draggableOffsetY);
 }
