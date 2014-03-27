@@ -649,7 +649,7 @@ function addSlidePreview(s, preview){
 	});
 	var length = preview.children.length;
 	preview.insertBefore(sp,preview.lastChild);
-	if (preview == preview || true){
+	if (preview = preview || true){
 		previewRender();
 	}
 }
@@ -738,7 +738,7 @@ function resize( event )
 
 function slideResize(slide){
 
-	var width = slide.offsetWidth;
+	var width = slide.parentNode.clientWidth;
 	console.log(width);
 	var height = width/aspect;
 	slide.style.height = height + "px";
