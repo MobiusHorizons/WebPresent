@@ -111,117 +111,6 @@ getResources : function(){return this.resources}
 
 
 
-(function(Archive){
-/*	Archive = function(blob){
-
-		this.resources = false;
-		this.header = { files: {} };
-		if (blob != undefined){
-			this.load(blob);
-		}
-	}*/
-
-
-
-	// helper functions
-
-	function getSizeAsUint32Array(blob){
-		array = new Uint32Array(2);
-		array[0] = blob.size;
-		return array;
-	}
-
-	Archive.read_ArrayBuffer = function(blob, callback){
-		var filereader = new FileReader();
-		filereader.onload = function(e){ callback(this.result)}
-		filereader.readAsArrayBuffer(blob);
-	}
-
-	Archive.read_String = function(blob, callback){
-		var filereader = new FileReader();
-		filereader.onload = function(e){ callback(this.result)}
-		filereader.readAsText(blob);
-	}
-	Archive.prototype = {
-		// Declarations
-resources : false,
-header :	{ files: {} },
-
-		/* add( Blob, identifier, attribs)
-		 * Takes the blob to be added, an identifier i.e filename, and any atributes as an object
-		 * attributes may be in any format
-		 */
-add : function(blob, identifier, atribs){
-	      var self = this;
-	      var entry = {};
-	      entry.length = blob.size;
-	      entry.type = blob.type;
-	      atribs = atribs || {};
-	      entry.atribs = atribs;
-	      if (this.resources){
-	      	      entry.start = self.resources.size;
-		      var tmp = new Blob([self.resources,blob]);
-		      self.resources = tmp;
-	      } else {
-		      entry.start = 0;
-		      self.resources = new Blob([blob]);
-	      }
-	      this.header.total = self.resources.size;
-	      console.log(entry);
-	      // todo doesn't handle colissions.
-	      self.header.files[identifier] = entry;
-	      return self.resources.slice(entry.start, entry.start + entry.length);
-      },
-
-get : function(name){
-	      var self = this;
-	      if (name in self.header.files){
-		      var f = self.header.files[name];
-		      console.log(name + ":" + f.type);
-		      return this.resources.slice(f.start,f.start + f.length,f.type);
-	      }
-      },
-
-list : function(){
-	       var n = [];
-	       for (name in this.header.files){
-		       n.push(name);	
-	       }
-	       return n;
-	},
-
-
-       /* returns the Archive being built.
-       */
-getBlob : function(){
-		  var self = this;
-		  var headBlob = new Blob([JSON.stringify(this.header)],{type:'application/json'});
-		  var sizeHeader = getSizeAsUint32Array(headBlob);
-		  return new Blob([sizeHeader,headBlob,this.resources],{type:'aplication/x-blob-archive'});
-	},
-
-load : function(Blob, calback){
-	       var self = this;
-	       self.header = {};
-	       self.resources = [];
-	       Archive.read_ArrayBuffer(Blob.slice(0,8), function(data){
-			       var length =  new Uint32Array(data)[0];
-			       console.log(length);
-			       Archive.read_String(Blob.slice(8,length+8),function(data){
-				       self.header = JSON.parse(data);
-				       console.log(data);
-				       self.resources = Blob.slice(length+8, Blob.size);
-				       if (calback != undefined && typeof( calback) == "function"){ calback(self)}
-				       });
-			       });
-       },
-
-getHeader : function(){return this.header},
-getResources : function(){return this.resources}
-	};
-}
-(window.Archive = window.Archive || function(blob){if (blob != undefined) this.load(blob)} ));
-
 /* Blob.js
  * A Blob implementation.
  * 2013-12-27
@@ -398,19 +287,20 @@ else var Blob = (function (view) {
 UI.draggable = function(elem, verb, attrs){
 	if (verb == 'set'){
 		elem.onmousedown = function(e){UI.draggable.mousedown(elem,e)};
+		elem.setAttribute('draggable','false'); // so we don't get drag and drop.
 	} 
 	if (verb == "unset" || verb == "remove" || verb == "none"){
 		elem.onmousedown = null;
+		elem.setAttribute('draggable','auto'); 
 	}
 }
 UI.draggable.mousedown = function(elem, e){
 	elem.draggableOffsetX = e.clientX - elem.offsetLeft;
 	elem.draggableOffsetY = e.clientY - elem.offsetTop;
-	console.log(e);
-	console.log('starting drag');
-	console.log(elem.offsetLeft);
-	console.log(elem.offsetTop);
-	elem.setAttribute('draggable','false'); // so we don't get drag and drop.
+	//console.log(e);
+	//console.log('starting drag');
+	//console.log(elem.offsetLeft);
+	//console.log(elem.offsetTop);
 	var old = {};
 	old.mov = window.onmousemove;
 	old.up = window.onmouseup;
@@ -418,11 +308,10 @@ UI.draggable.mousedown = function(elem, e){
 	window.onmouseup = function(){
 		window.onmousemove = old.mov; window.onmouseup = old.up;
 		elem.draggableOffsetX = undefined; 
-		elem.setAttribute('draggable','auto'); 
 		elem.draggableOffsetY = undefined; 
 		elem.ontransformed({target: elem});
 	}
-	console.log(elem.draggableOffsetX +":"+ elem.draggableOffsetY);
+	//console.log(elem.draggableOffsetX +":"+ elem.draggableOffsetY);
 }
 
 UI.draggable.getSnapCoords = function(elem, snapselectors){
@@ -1370,12 +1259,6 @@ function view(preview){
 	var p = preview || false;
 	lib.foreach(lib.sel('#toolbar,#container, #slide_main,#slidespreview'),function(el){el.dataset.edit=false})
 	borders(false);
-	if (!p){
-//		UI.hide(lib.selID('toolbar'));
-//		lib.selID('container').style.top = "0px";
-	//	$('#toolbar').hide();
-	//	$('#container').css("top", "0px");
-	}
 	lib.foreach(active.children,function(child,i){
 		UI.resizeable(child,'remove');
 		UI.draggable(child,'remove');
@@ -1383,14 +1266,6 @@ function view(preview){
 			ce.setAttribute('contenteditable',false);
 			ce.spellcheck = false;
 	});
-	/*for (i=1;i<=ID_CT;i++){
-		UI.resizeable(lib.selID('outer' + i), 'remove');
-		UI.draggable(lib.selID('outer' + i), 'remove');
-		//$('#outer'+i).resizable('destroy');
-        	//$('#outer'+i).draggable('destroy')
-		lib.selID(i).setAttribute('contenteditable',false);
-//		$('#outer'+i).attr("contenteditable", false);
-	}*/
 	if (!p){
 		active.removeEventListener('contextmenu',addItemMenu);
 		slideshow.start(active);
@@ -1402,6 +1277,10 @@ function view(preview){
 
 function preview(){
 	document.body[window.getRFS()]();
+	document.body.addEventListener('webkitfullscreenchange',UI.events.fsChange);
+	document.body.addEventListener('mozfullscreenchange',UI.events.fsChange);
+	document.body.addEventListener('fullscreenchange',UI.events.fsChange);
+	location.hash = '/edit';
 	location.hash = '/view';
 }
 
@@ -1416,14 +1295,6 @@ function setEdit(preview){
 	var p = preview || false;
 	lib.foreach(lib.sel('#toolbar,#container, #slide_main,#slides_preview'),function(el){el.dataset.edit=true})
 	borders(true);
-        if (!p){
-//		UI.show(lib.selID('toolbar'));
-//		lib.selID('container').style.top = lib.selID('toolbar').offsetHeight + "px";
-        	//$('#toolbar').show();
-//		var btnHeight = $('button').css('height');
-//		var tbarPad = $('#toolbar').css('padding');
-//        	$('#container').css("top",$('#toolbar').outerHeight() + "px" );
-	}
 	lib.foreach(active.children,function(child,i){
 		UI.resizeable(child,'set');
 		UI.draggable(child,'set');
@@ -1432,20 +1303,8 @@ function setEdit(preview){
 				ce.spellcheck = false;
 		child.ontransformed = boxDrag;
 	})
-/*        for (i=1;i<=ID_CT;i++){
-		
-                //$('#outer'+i).resizable( );
-                //$('#outer'+i).draggable({snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
-                //$('#outer'+i).attr("contenteditable", true);
-//		$('#outer'+i).on('dragstop',function(event, ui){console.log(event);console.log(ui)});
-		UI.resizeable(lib.selID('outer' + i), 'set');
-		UI.draggable(lib.selID('outer' + i), 'set');
-		lib.selID('outer'+i).setAttribute('contenteditable',false);
-		lib.selID('outer'+i).ontransformed = boxDrag;
-        }*/
 	if (!p){
 		active.addEventListener('contextmenu',addItemMenu);
-		active.onmouseup = '';
 		navigation(false); // add navigation listeners
         	edit = true;
 	        resize();
@@ -1532,13 +1391,6 @@ function initialize(){
 	active = document.getElementById("slide_main");
 	UI.touch(active);
 	newSlide();
-	if (savedHTML){
-		active.innerHTML = unescape(savedHTML);
-	}
-	if (slide_background){
-		slide_background_set();
-	//		active.style.backgroundImage="url("+slide_background+") + center center fixed";
-	}
 	emSize = getDefaultFontSize(active);
 	resize();
 
@@ -1552,7 +1404,6 @@ function initialize(){
 		view();
 		window.location.hash = "#/view";
 	}
-	//window.addEventListener('hashchange',route);
 	window.onhashchange = route;
 }
 
@@ -1648,7 +1499,7 @@ function Add_elem(type){
 		var textArea = document.createElement('div');
 			//textArea.setAttribute('id','outer' + ID_CT);
 			textArea.setAttribute('class','text_area');
-		UI.draggable(textArea, 'set');
+//		UI.draggable(textArea, 'set');
 		var handle = document.createElement('div');
 			handle.setAttribute('class','handle');
 			textArea.appendChild(handle);
@@ -1779,6 +1630,7 @@ function load_slideshow(){
 			addSlidePreview(el,false);	
 		});*/
 		previewRender();
+		setEdit();
 	});
 		
 }
@@ -1829,6 +1681,8 @@ function back(){
 }
 UI.events = {};
 UI.events.keyboard = function(e){
+		console.log('keypress');
+		console.log(e.keyCode);
 		if(e.keyCode==39 ){ //right
 			next();
 		} else if (e.keyCode == 37){ //left
@@ -1842,6 +1696,19 @@ UI.events.mouse = function(e){
 		else {back()}
 	}
 };
+
+UI.events.fsChange = function(e){
+	console.log(e);
+	var fs = document.webkitFullscreenElement 
+		|| document.mozFullscreenElement 
+		|| document.msFullscreenElement 
+		|| document.fullscreenElement;
+	console.log("fullScreenChange");
+	console.log(fs);
+	if(!fs){
+			location.hash = "/edit";
+	}
+}
 
 function navigation(add){
 	if (add){
@@ -2127,305 +1994,3 @@ function slideResize(slide){
 		return e;
 	}	
 }(window.lib = window.lib|| {}));
-
-/*!
- * CSS Modal
- * http://drublic.github.com/css-modal
- *
- * @author Hans Christian Reinl - @drublic
- * @version 1.1.0alpha
- */
-
-(function (global) {
-
-	'use strict';
-
-	/*
-	 * Storage for functions and attributes
-	 */
-	var modal = {
-
-		activeElement: undefined, // Store for currently active element
-		lastActive: undefined, // Store for last active elemet
-		stackedElements: [], // Store for stacked elements
-
-		// All elements that can get focus, can be tabbed in a modal
-		tabbableElements: 'a[href], area[href], input:not([disabled]),' +
-			'select:not([disabled]), textarea:not([disabled]),' +
-			'button:not([disabled]), iframe, object, embed, *[tabindex],' +
-			'*[contenteditable]',
-
-		/*
-		 * Polyfill addEventListener for IE8 (only very basic)
-		 * @param event {string} event type
-		 * @param element {Node} node to fire event on
-		 * @param callback {function} gets fired if event is triggered
-		 */
-		on: function (event, element, callback) {
-			if (element.addEventListener) {
-				element.addEventListener(event, callback, false);
-			} else {
-				element.attachEvent('on' + event, callback);
-			}
-		},
-
-		/*
-		 * Convenience function to trigger event
-		 * @param event {string} event type
-		 * @param modal {string} id of modal that the event is triggerd on
-		 */
-		trigger: function (event, modal) {
-			var eventTrigger;
-
-			if (!window.CustomEvent) {
-				return;
-			}
-
-			eventTrigger = new CustomEvent(event, {
-				detail: {
-					'modal': modal
-				}
-			});
-
-			document.dispatchEvent(eventTrigger);
-		},
-
-		/*
-		 * Convenience function to add a class to an element
-		 * @param element {Node} element to add class to
-		 * @param className {string}
-		 */
-		addClass: function (element, className) {
-			if (element && !element.className.match(className)) {
-				element.className += ' ' + className;
-			}
-		},
-
-		/*
-		 * Convenience function to remove a class from an element
-		 * @param element {Node} element to remove class off
-		 * @param className {string}
-		 */
-		removeClass: function (element, className) {
-			element.className = element.className.replace(className, '').replace('  ', ' ');
-		},
-
-		/*
-		 * Focus modal
-		 */
-		setFocus: function () {
-			if (modal.activeElement) {
-
-				// Set element with last focus
-				modal.lastActive = document.activeElement;
-
-				// New focussing
-				modal.activeElement.focus();
-
-				// Add handler to keep the focus
-				modal.keepFocus(modal.activeElement);
-			}
-		},
-
-		/*
-		 * Unfocus
-		 */
-		removeFocus: function () {
-			if (modal.lastActive) {
-				modal.lastActive.focus();
-			}
-		},
-
-		/*
-		 * Keep focus inside the modal
-		 * @param element {node} element to keep focus in
-		 */
-		keepFocus: function (element) {
-			var allTabbableElements = element.querySelectorAll(modal.tabbableElements);
-			var firstTabbableElement = allTabbableElements[0];
-			var lastTabbableElement = allTabbableElements[allTabbableElements.length - 1];
-
-			var focusHandler = function (event) {
-				var keyCode = event.which || event.keyCode;
-
-				// TAB pressed
-				if (keyCode !== 9) {
-					return;
-				}
-
-				// Polyfill to prevent the default behavior of events
-				event.preventDefault = event.preventDefault || function () {
-					event.returnValue = false;
-				};
-
-				// Move focus to first element that can be tabbed if Shift isn't used
-				if (event.target === lastTabbableElement && !event.shiftKey) {
-					event.preventDefault();
-					firstTabbableElement.focus();
-
-				// Move focus to last element that can be tabbed if Shift is used
-				} else if (event.target === firstTabbableElement && event.shiftKey) {
-					event.preventDefault();
-					lastTabbableElement.focus();
-				}
-			};
-
-			modal.on('keydown', element, focusHandler);
-		},
-
-		/*
-		 * Mark modal as active
-		 * @param element {Node} element to set active
-		 */
-		setActive: function (element) {
-			modal.addClass(element, 'is-active');
-			modal.activeElement = element;
-
-			// Set the focus to the modal
-			modal.setFocus(element.id);
-
-			// Fire an event
-			modal.trigger('cssmodal:show', modal.activeElement);
-		},
-
-		/*
-		 * Unset previous active modal
-		 * @param isStacked {boolean} true if element is stacked above another
-		 */
-		unsetActive: function (isStacked) {
-			if (modal.activeElement) {
-				modal.removeClass(modal.activeElement, 'is-active');
-
-				// Fire an event
-				modal.trigger('cssmodal:hide', modal.activeElement);
-
-				// Unfocus
-				modal.removeFocus();
-
-				// Make modal stacked if needed
-				if (isStacked) {
-					modal.stackModal(modal.activeElement);
-				}
-
-				// If there are any stacked elements
-				if (!isStacked && modal.stackedElements.length > 0) {
-					modal.unstackModal();
-				}
-
-				// Reset active element
-				modal.activeElement = null;
-			}
-		},
-
-		/*
-		 * Stackable modal
-		 * @param stackableModal {node} element to be stacked
-		 */
-		stackModal: function (stackableModal) {
-			modal.addClass(stackableModal, 'is-stacked');
-
-			// Set modal as stacked
-			modal.stackedElements.push(modal.activeElement);
-		},
-
-		/*
-		 * Reactivate stacked modal
-		 */
-		unstackModal: function () {
-			var stackedCount = modal.stackedElements.length;
-			var lastStacked = modal.stackedElements[stackedCount - 1];
-
-			modal.removeClass(lastStacked, 'is-stacked');
-
-			// Set hash to modal, activates the modal automatically
-			window.location.hash = lastStacked.id;
-
-			// Remove modal from stackedElements array
-			modal.stackedElements.splice(stackedCount - 1, 1);
-		},
-
-		/*
-		 * When displaying modal, prevent background from scrolling
-		 */
-		mainHandler: function () {
-			var hash = window.location.hash.replace('#', '');
-			var modalElement = document.getElementById(hash);
-			var modalChild;
-
-			// If the hash element exists
-			if (modalElement) {
-
-				// Get first element in selected element
-				modalChild = modalElement.children[0];
-
-				// When we deal with a modal and body-class `has-overlay` is not set
-				if (modalChild && modalChild.className.match(/modal-inner/)) {
-
-					// Set an html class to prevent scrolling
-					modal.addClass(document.documentElement, 'has-overlay');
-
-					// Make previous element stackable
-					modal.unsetActive(true);
-
-					// Mark the active element
-					modal.setActive(modalElement);
-				}
-			} else {
-				modal.removeClass(document.documentElement, 'has-overlay');
-
-				// If activeElement is already defined, delete it
-				modal.unsetActive();
-			}
-		}
-	};
-
-
-	/*
-	 * Hide overlay when ESC is pressed
-	 */
-	modal.on('keyup', document, function (event) {
-		var hash = window.location.hash.replace('#', '');
-
-		// If hash is not set
-		if (hash === '' || hash === '!') {
-			return;
-		}
-
-		// If key ESC is pressed
-		if (event.keyCode === 27) {
-			window.location.hash = '!';
-
-			if (modal.lastActive) {
-				return false;
-			}
-
-			// Unfocus
-			modal.removeFocus();
-		}
-	}, false);
-
-
-	/*
-	 * Trigger main handler on load and hashchange
-	 */
-	modal.on('hashchange', window, modal.mainHandler);
-	modal.on('load', window, modal.mainHandler);
-
-	/*
-	 * AMD, module loader, global registration
-	 */
-
-	// Expose modal for loaders that implement the Node module pattern.
-	if (typeof module === 'object' && module && typeof module.exports === 'object') {
-		module.exports = modal;
-
-	// Register as an AMD module
-	} else if (typeof define === 'function' && define.amd) {
-		define([], function () { return modal; });
-
-	// Export CSSModal into global space
-	} else if (typeof global === 'object' && typeof global.document === 'object') {
-		global.CSSModal = modal;
-	}
-
-}(window));
