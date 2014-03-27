@@ -72,7 +72,12 @@ function borders(display){
  */
 function view(preview){
 	var p = preview || false;
-	lib.foreach(lib.sel('#toolbar,#container, #slide_main,#slidespreview'),function(el){el.dataset.edit=false})
+	lib.foreach(lib.sel('#toolbar,#container, #slide_main,#slidespreview'),function(el){
+		if (el.dataset)
+			el.dataset.edit=false
+		else
+			el.setAttribute('data-edit',"false");
+	})
 	borders(false);
 	lib.foreach(active.children,function(child,i){
 		UI.resizeable(child,'remove');
@@ -108,7 +113,12 @@ function boxDrag(event, ui){
 
 function setEdit(preview){
 	var p = preview || false;
-	lib.foreach(lib.sel('#toolbar,#container, #slide_main,#slides_preview'),function(el){el.dataset.edit=true})
+	lib.foreach(lib.sel('#toolbar,#container, #slide_main,#slides_preview'),function(el){
+		if (el.dataset)
+			el.dataset.edit=true
+		else 
+			el.setAttribute('data-edit','true');
+	})
 	borders(true);
 	lib.foreach(active.children,function(child,i){
 		UI.resizeable(child,'set');
