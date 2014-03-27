@@ -173,7 +173,8 @@ i.cross{
 	border-radius: 5px;
 	border: 2px solid black;
 	width: 100%;
-	height: calc(12em * 9 / 16);	
+	height: calc(200px * 9 / 16);	
+	overflow: hidden;
 }
 
 .slide_text li{
