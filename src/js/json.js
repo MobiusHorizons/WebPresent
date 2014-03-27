@@ -738,8 +738,7 @@ function resize( event )
 
 function slideResize(slide){
 
-	var width = slide.clientWidth;
-	console.log(width);
+	var width = slide.parentNode.clientWidth;
 	var height = width/aspect;
 	slide.style.height = height + "px";
 	var textWidth = 2 * (width / 1024) + 'em';
