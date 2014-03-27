@@ -1,8 +1,14 @@
 var RFS = function (el){
-	return el.requestFullScreen || el.webkitRequestFullScreen || el.msRequestFullScreen || el.mozRequestFullScreen;
+	return el.requestFullScreen || el.webkitRequestFullScreen || el.msRequestFullScreen || el.mozRequestFullScreen || null;
 }
 
 var getRFSN = function(){
+	var f = RFS(document.body);
+	if ( f == null){
+		console.log('does not support full screen');
+		return 'focus' // harmless ubiquitous function;
+	}
+
 	return RFS(document.body).name;
 }
 

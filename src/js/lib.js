@@ -65,21 +65,4 @@
 		});
 		return e;
 	}	
-	/*lib.follow = function(elem, trail){
-		if (typeof trail == 'string'){
-			return elem[trail];
-		} else {
-			var ntrail = trail[trail.key];
-			return elem[lib.follow(elem[trail.key],ntrail)];
-		}
-	}
-
-	lib.makeTrail(string){
-		var trail = "";
-		var ids = string.split('.');
-		for (var i in ids)){
-			var id = ids[i];
-			
-		}	
-	}*/
 }(window.lib = window.lib|| {}));

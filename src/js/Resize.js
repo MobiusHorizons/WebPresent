@@ -7,7 +7,7 @@ UI.resizeable = function(element, verb, attrs){
 	
 	/** else **/
 	if (verb == "set" || verb == "both"){
-		if (element.style.overflow == "")
+		if (window.getComputedStyle(element,null).getPropertyValue('overflow') == "")
 			element.style.overflow = "auto";
 	
 		//element.style.resize = 'both';
@@ -35,7 +35,7 @@ UI.resizeable = function(element, verb, attrs){
 
 	if (verb == "remove" || verb == "unset" || verb == "none"){
 		element.style.resize = 'none';
-		if (element.resizeHandle != undefined){
+		if (element.resizeHandle && element.resizeHandle.parentNode == element){
 			element.removeChild(element.resizeHandle);
 		}
 	}
@@ -46,6 +46,7 @@ UI.resizeable.mousedown = function(elem, e){
 	elem.resizeableOffsetY = e.clientY;
 	elem.resizeableWidth = elem.offsetWidth;
 	elem.resizeableHeight = elem.offsetHeight;
+	elem.setAttribute('draggable','false'); // so we don't get drag and drop.
 	console.log(e);
 	console.log('starting resize');
 	var old = {};
@@ -58,6 +59,7 @@ UI.resizeable.mousedown = function(elem, e){
 		elem.resizeableOffsetY = undefined; 
 		elem.resizeableWidth = undefined; 
 		elem.resizeableHeight = undefined; 
+		elem.setAttribute('draggable','auto');
 		elem.ontransformed({target:elem});
 	}
 	console.log(elem.draggableOffsetX +":"+ elem.draggableOffsetY);

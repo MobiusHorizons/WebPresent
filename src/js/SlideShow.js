@@ -8,6 +8,7 @@
 		archive : null,
 		onload: null,
 		slides : [],
+		currentSlide: null,
 		load : function (file, cb){
 			var self = this;
 			self.slides = [];
@@ -18,7 +19,8 @@
 					for (s in package.slides){
 						var slide = new Slide(self.archive,package.slides[s]);
 						slide.slideshow = self;
-						self.slides.push(slide);
+						var id = self.slides.push(slide);
+						self.slides[id-1].id=id-1;
 					}	
 					if (cb != undefined) cb(self);
 					if (self.onload != null) self.onload(self);
@@ -32,10 +34,10 @@
 			for (slide in self.slides){
 				package.slides.push(self.slides[slide].save())
 			}
-			console.log(package);
+//			console.log(package);
 			var stringJSON = JSON.stringify(package);
 			var pkg = new Blob([stringJSON],{type:'aplication/json'});
-			console.log(stringJSON);
+//			console.log(stringJSON);
 			self.archive.add(pkg, 'package.json', {});
 			return self.archive.getBlob(); 	
 		},
@@ -70,8 +72,8 @@
 		},
 
 		removeSlide : function(slide){
-			slides[slide.id].delete();
-			slides.remove(slide.id);
+			self.slides[slide.id].delete();
+			self.slides.remove(slide.id);
 		},
 		addResource : function (blob, name){
 			var self = this;
@@ -81,9 +83,51 @@
 			} else {
 				return self.archive.add(blob,name, {});
 			}
+		},
+		next : function (screen){
+			var self = this;
+			if (self.currentSlide == null){
+				return self.start(screen);
+			}
+			if (self.currentSlide.next(screen) == false){
+				var id = self.currentSlide.id;
+				console.log(id);
+				return self.render(id+1,screen);
+				/*if ((id+1) < self.slides.length){
+					self.currentSlide = self.slides[id+1];
+					self.currentSlide.render(screen);
+					return true;
+				}
+				return false;*/
+			}
+		},
+		back : function (screen){
+			var self = this;
+			if (self.currentSlide == null){
+				return self.start(screen)
+			}
+			if (self.currentSlide.back(screen) == false){
+				var id = self.currentSlide.id;
+				console.log(id);
+				return self.render(id-1,screen);
+			}
+		},
+		render : function(id, screen, setCurrent){
+			if (setCurrent == undefined){ setCurrent = true; }
+			else { console.log('currentSide updating to ' + id)};
+			var self = this;
+			if (id >=0 && id < self.slides.length){
+				self.slides[id].render(screen);
+				if (setCurrent) self.currentSlide = self.slides[id];
+				return true;
+			} 
+			return false;
+		},
+		start : function(screen){
+			var self = this;
+			self.render(0,screen,true);
 		}
 	}
 }(window.SlideShow = window.SlideShow || function(){ 
 	this.archive = new Archive();
-	console.log(this.archive);
 }));

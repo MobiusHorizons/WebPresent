@@ -39,25 +39,25 @@ function updateAspect(sel){
  */
 function borders(display){
 	if (display){
-		lib.selID('slide_screen').style.border = '2px solid gray';
-		lib.foreach(lib.selClass('slide'), function(el){el.style.border = "2px dashed white"});
-		lib.foreach(lib.selClass('handle'), function(el){el.style.backgroundColor = 'rgba(0,0,0,.5)'});
-		lib.foreach(lib.selClass('text_area'), function(el){
-			el.style.border = '2px dashed white';
-			el.style.boxShadow = " 0 0 0.2em black, 0 0 0.2em black,0 0 0.2em gray"
-		});
+		//lib.selID('slide_screen').style.border = '2px solid gray';
+		//lib.foreach(lib.selClass('slide'), function(el){el.style.border = "2px dashed white"});
+		//lib.foreach(lib.selClass('handle'), function(el){el.style.backgroundColor = 'rgba(0,0,0,.5)'});
+		//lib.foreach(lib.selClass('text_area'), function(el){
+		//	el.style.border = '2px dashed white';
+		//	el.style.boxShadow = " 0 0 0.2em black, 0 0 0.2em black,0 0 0.2em gray"
+		//});
 //		$('.slide_text h2').css('border','2px dashed black');
 //		$('.handle').css('background-color','rgba(0,0,0,.5)');
 //		$('.text_area').css('border','2px dashed white');
 //		$('.text_area').css('box-shadow', ' 0 0 0.2em black, 0 0 0.2em black,0 0 0.2em gray');
 	} else {
-		lib.selID('slide_screen').style.border = 'none';
-		lib.foreach(lib.selClass('slide'), function(el){el.style.border = "none"});
-		lib.foreach(lib.selClass('handle'), function(el){el.style.backgroundColor = ''});
-		lib.foreach(lib.selClass('text_area'), function(el){
-			el.style.border = 'none';
+		//lib.selID('slide_screen').style.border = 'none';
+		//lib.foreach(lib.selClass('slide'), function(el){el.style.border = "none"});
+//		lib.foreach(lib.selClass('handle'), function(el){el.style.backgroundColor = ''});
+		//lib.foreach(lib.selClass('text_area'), function(el){
+		//	el.style.border = 'none';
 		//	el.style.boxShadow = 'none';
-		});
+		//});
 //		$('#slide_screen').css('border','none');
 //		$('.slide').css('border','none');
 //		$('.slide_text h2').css('border','none');
@@ -72,24 +72,33 @@ function borders(display){
  */
 function view(preview){
 	var p = preview || false;
+	lib.foreach(lib.sel('#toolbar,#container, #slide_main,#slidespreview'),function(el){el.dataset.edit=false})
 	borders(false);
 	if (!p){
-		UI.hide(lib.selID('toolbar'));
-		lib.selID('container').style.top = "0px";
+//		UI.hide(lib.selID('toolbar'));
+//		lib.selID('container').style.top = "0px";
 	//	$('#toolbar').hide();
 	//	$('#container').css("top", "0px");
 	}
-	for (i=1;i<=ID_CT;i++){
+	lib.foreach(active.children,function(child,i){
+		UI.resizeable(child,'remove');
+		UI.draggable(child,'remove');
+		var ce = child.querySelector(".content-editable");
+			ce.setAttribute('contenteditable',false);
+			ce.spellcheck = false;
+	});
+	/*for (i=1;i<=ID_CT;i++){
 		UI.resizeable(lib.selID('outer' + i), 'remove');
 		UI.draggable(lib.selID('outer' + i), 'remove');
 		//$('#outer'+i).resizable('destroy');
         	//$('#outer'+i).draggable('destroy')
-		lib.selID('outer'+i).setAttribute('contenteditable',false);
+		lib.selID(i).setAttribute('contenteditable',false);
 //		$('#outer'+i).attr("contenteditable", false);
-	}
+	}*/
 	if (!p){
 		active.removeEventListener('contextmenu',addItemMenu);
-	
+		slideshow.start(active);
+		navigation(true);// add navigation listeners
 		edit = false;
 		resize();
 	}
@@ -101,8 +110,6 @@ function preview(){
 }
 
 function boxDrag(event, ui){
-	console.log(event);
-	console.log(ui);
 	event.target.top = (event.target.offsetTop - ( winH/2 )) / winH ;
 	event.target.left = (event.target.offsetLeft - (winW/2))/ winW;
 	event.target.height = (event.target.clientHeight/winH);
@@ -111,17 +118,25 @@ function boxDrag(event, ui){
 
 function setEdit(preview){
 	var p = preview || false;
+	lib.foreach(lib.sel('#toolbar,#container, #slide_main,#slides_preview'),function(el){el.dataset.edit=true})
 	borders(true);
         if (!p){
-		UI.show(lib.selID('toolbar'));
-		lib.selID('container').style.top = lib.selID('toolbar').offsetHeight + "px";
+//		UI.show(lib.selID('toolbar'));
+//		lib.selID('container').style.top = lib.selID('toolbar').offsetHeight + "px";
         	//$('#toolbar').show();
 //		var btnHeight = $('button').css('height');
 //		var tbarPad = $('#toolbar').css('padding');
 //        	$('#container').css("top",$('#toolbar').outerHeight() + "px" );
-//		console.log($('#container').css("top"));
 	}
-        for (i=1;i<=ID_CT;i++){
+	lib.foreach(active.children,function(child,i){
+		UI.resizeable(child,'set');
+		UI.draggable(child,'set');
+		var ce = child.querySelector(".content-editable");
+				ce.setAttribute('contenteditable',true);
+				ce.spellcheck = false;
+		child.ontransformed = boxDrag;
+	})
+/*        for (i=1;i<=ID_CT;i++){
 		
                 //$('#outer'+i).resizable( );
                 //$('#outer'+i).draggable({snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
@@ -131,9 +146,11 @@ function setEdit(preview){
 		UI.draggable(lib.selID('outer' + i), 'set');
 		lib.selID('outer'+i).setAttribute('contenteditable',false);
 		lib.selID('outer'+i).ontransformed = boxDrag;
-        }
+        }*/
 	if (!p){
 		active.addEventListener('contextmenu',addItemMenu);
+		active.onmouseup = '';
+		navigation(false); // add navigation listeners
         	edit = true;
 	        resize();
 	}
@@ -156,11 +173,14 @@ function addItemMenu(e){
 				li.setAttribute('onclick','Add_elem("image")');
 				li.innerHTML = "Image";
 			menu.appendChild(li);
+			li = document.createElement("li");
+				li.setAttribute('onclick','Add_elem("video")');
+				li.innerHTML = "video";
+			menu.appendChild(li);
 			e.target.appendChild(menu);
 		menu.style.position = "absolute";
 		menu.style.top = e.offsetY + "px";
 		menu.style.left = e.offsetX + "px";
-		//console.log(menu);
 		e.preventDefault();
 		e.returnValue = false;
 		active.addEventListener('click',remove_menu);
@@ -186,7 +206,6 @@ function remove_menu(){
 }
 
 function route(){
-	//console.log(window.location);
 	if (window.location.hash == "#!"){
 		window.location.hash = lastSlideHash;
 	}
@@ -212,10 +231,11 @@ function getDefaultFontSize(parentElement)
 }
 
 function initialize(){
+	
 	slideshow = new SlideShow();
-	slide = new Slide();
-	slide = slideshow.addSlide(slide);
 	active = document.getElementById("slide_main");
+	UI.touch(active);
+	newSlide();
 	if (savedHTML){
 		active.innerHTML = unescape(savedHTML);
 	}
@@ -265,7 +285,6 @@ function save_elem(){
 	//ud.innerHTML += "ID_CT = "+ID_CT+';\n';
 	ud.innerHTML += "edit = false;";
 	document.head.appendChild(ud);
-	console.log(ud);
 	//view();
 	saveAs( slideshow.save()
     		, "slideshow.shw"
@@ -294,7 +313,6 @@ function changeBG(){
 			title : "Please choose a Background Image",
 		});
 	bgChooser.onselected = function(file){ 
-		console.log("onselected");
 		if (file == undefined)
 			return false;
 		console.log(file);
@@ -308,7 +326,6 @@ function changeBG(){
 /*function handleBackgroundSelect(evt){
 	var file = evt.target.files[0];
 	files["slide_BG"]=file;
-	console.log(file);
 	$('#modal-upload-img').attr('src', URL.createObjectURL(file));	
 	set_slide_background();
 /*	if (file.type.match('image.*')){
@@ -327,57 +344,24 @@ function changeBG(){
 	}*/
 //}
 
-function image_CB(img, elem){
-	var fun = function(evt){
-   		var file = evt.target.files[0];
-        	if (file.type.match('image.*')){
-			//$('#modal-upload-img').attr('src', URL.createObjectURL(file));	
-			img.style.backgroundImage = 'url(' + URL.createObjectURL(file) + ')';
-               		console.log(file.type);
-			elem.links = [];
-			elem.links.push("img.style.backgroundImage",file.name);
-			var rl = {'resource' : file,
-				  'link' : {
-					'type': 'css',
-					'id'  : 'childNodes.1.style.backgroundImage'
-					}
-				};
-
-			slide.add(elem,'image',[rl]);
-			document.getElementById('file').addEventListener('change',fun,false);
-
-/*               		var reader = new FileReader();
-               		reader.onload = (function(theFile){
-                       		return function(e) {
-                               		$('#modal-upload-img').attr('src', e.target.result);
-					img.style.backgroundImage = 'url(' + e.target.result + ')';
-                    		}
-                	})(file);
-                	reader.readAsDataURL(file);
-*/
-        	}		
-	}
-	document.getElementById('file').addEventListener('change',fun,false);
-}
 
 
 function Add_elem(type){
 	if (type == "text_area"){
 		ID_CT = slide.nextID();
 		var textArea = document.createElement('div');
-			textArea.setAttribute('id','outer' + ID_CT);
+			//textArea.setAttribute('id','outer' + ID_CT);
 			textArea.setAttribute('class','text_area');
 		UI.draggable(textArea, 'set');
 		var handle = document.createElement('div');
 			handle.setAttribute('class','handle');
 			textArea.appendChild(handle);
 		var text = document.createElement('div');
-			text.setAttribute('id',ID_CT);
-			text.setAttribute('class','slide_text');
+			//text.setAttribute('id',ID_CT);
+			text.className = "slide_text content-editable";
 			text.setAttribute('contenteditable',true);
 			text.innerHTML = "";
 			textArea.appendChild(text);
-		console.log(textArea);
 		active.appendChild(textArea);
 		textArea.style.top = lastClick.y + 'px';
 		textArea.style.left = lastClick.x + 'px';
@@ -391,13 +375,13 @@ function Add_elem(type){
 	} else if (type == "image"){
 		ID_CT = slide.nextID();
 		var textArea = document.createElement('div');
-			textArea.setAttribute('id','outer' + ID_CT);
+			//textArea.setAttribute('id','outer' + ID_CT);
 			textArea.setAttribute('class','text_area');
 		var handle = document.createElement('div');
 			handle.setAttribute('class','handle');
 			textArea.appendChild(handle);
 		var img = document.createElement('div');
-				img.setAttribute('id',ID_CT);
+				//img.setAttribute('id',ID_CT);
 				img.setAttribute('class','slide_text slide_img');
 				textArea.appendChild(img);
 		UI.resizeable(textArea,'set');
@@ -421,7 +405,6 @@ function Add_elem(type){
 		var image_preview = new Preview({type:'image'});
 		image_preview.onselected = function(file){
 			img.style.backgroundImage = 'url(' + URL.createObjectURL(file) + ')';
-               		console.log(file.type);
 			textArea.links = [];
 			textArea.links.push("img.style.backgroundImage",file.name);
 			var rl = {'resource' : file,
@@ -440,50 +423,41 @@ function Add_elem(type){
 	} else if (type == "video"){
 		ID_CT ++;
 		var textArea = document.createElement('div');
-			textArea.setAttribute('id','outer' + ID_CT);
+			//textArea.setAttribute('id','outer' + ID_CT);
 			textArea.setAttribute('class','text_area');
 		var handle = document.createElement('div');
 			handle.setAttribute('class','handle');
 			textArea.appendChild(handle);
 		var img = document.createElement('video');
-				img.setAttribute('id',ID_CT);
+				//img.setAttribute('id',ID_CT);
 				img.setAttribute('class','slide_text slide_img');
 				img.setAttribute('controls',true);
 				textArea.appendChild(img);
 	
-		active.appendChild(textArea);
-		textArea.style.top = lastClick.y + 'px';
-		textArea.style.left = lastClick.x + 'px';
-/*		for(i=1;i<=ID_CT;i++){
-			UI.resizeable(lib.selID('outer' + i), 'set');
-			UI.draggable(lib.selID('outer' + i), 'set', {snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
-			lib.selID(i).setAttribute('contenteditable',true);
-			lib.selID('outer'+i).ondragstop = boxDrag;
-//				$('#outer'+i).resizable();
-//				$('#outer'+i).resizable( "destroy" );
-//				$('#outer'+i).resizable();
-//              		$('#outer'+i).draggable({snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
-//				$('#outer'+i).on('dragstop',boxDrag);
-		}*/
-		//		clear_UI_modal();
-		var fun =function(evt){
-   			var file = evt.target.files[0];
-			files.video = file;
-			img.src = URL.createObjectURL(file);
-			document.getElementById('file').removeEventListener('change',fun);
-			
-			//img.setAttribute('src',URL.createObjectURL(file));
+		UI.resizeable(textArea,'set');
+		UI.draggable(textArea,'set');
+		textArea.style.top = lastClick.clientY + 'px';
+		textArea.style.left = lastClick.clientX + 'px';
+		var image_preview = new Preview({type:'video'});
+		image_preview.onselected = function(file){
+			img.src = URL.createObjectURL(file)  ;
+			var rl = {'resource' : file,
+				  'link' : {
+					'type': 'url',
+					'id'  : 'childNodes.1.src'
+					}
+				};
+
+			slide.add(textArea,'image',[rl]);
+			active.appendChild(textArea);
 		}
-		document.getElementById('file').addEventListener('change',fun);
-		window.location.hash = "#modal-upload";
-		console.log(textArea);
-		borders(true);
+		image_preview.show();
 		return textArea;
 	}
 	return null;
 }
 
-function UI_modal_file(caption){
+/*function UI_modal_file(caption){
 	var modal = UI_modal();
 	var fileUpload = document.createElement('input');
 	fileUpload.setAttribute("type","file");
@@ -492,7 +466,7 @@ function UI_modal_file(caption){
 	modal.header.innerHTML = caption;
 	modal.content.appendChild(fileUpload);
 	
-}
+}*/
 
 function load_slideshow(){
         var s = document.getElementById('slide_main');
@@ -500,8 +474,17 @@ function load_slideshow(){
 	slideshow.load(document.getElementById('loadNEW').files[0], function(){
 		slide = slideshow.slides[0];
 		ID_CT = slide.ID_CT;
-		slideshow.slides[0].render(s);
+		slideshow.render(0,active,true);
+	/*	var p = lib.selID('slides_preview');
+		lib.foreach(lib.sel('.slide.thumb'),function(el){
+			p.removeChild(el);
+		});
+		lib.foreach(slideshow.slides, function(el){
+			addSlidePreview(el,false);	
+		});*/
+		previewRender();
 	});
+		
 }
 
 function Remote_Slide(){
@@ -532,7 +515,8 @@ function jump_to(slide,sub){
 }
 
 function back(){
-	if (subElemCount){
+	slideshow.back(active);
+	/*if (subElemCount){
 		hide();
 		jump_to(count, --subElemCount);
 		subElemCount;
@@ -545,51 +529,49 @@ function back(){
 			hide();
 			load();
 		}
-	}
+	}*/
 }
+UI.events = {};
+UI.events.keyboard = function(e){
+		if(e.keyCode==39 ){ //right
+			next();
+		} else if (e.keyCode == 37){ //left
+			back();
+		}
+};
 
-function attatch_listeners(){
-	active.addEventListener("mouseup",next,false);
-	$('body').keydown(function(e){
-		if (e){
-			if(e.keyCode==39){ //right
-				next();
-			} else if (e.keyCode == 37){ //left
-				back();
-			}
-		}
-	});
-	active.addEventListener("touchstart",function(event){
-		if(event.targetTouches.length==1){
-			//event.preventDefault();
-			//alert("hello");
-			touchStartX = event.targetTouches[0].pageX;
-			touchStartY = event.targetTouches[0].pageY;
-		}
-	}, true);
-	active.addEventListener("touchmove", function(event){
-		if(event.targetTouches.length == 1){
-			event.preventDefault();
-			//if(event.targetTouches[0].pageX-touchStartX >30){alert("swipe");}
-			touchLengthX = event.targetTouches[0].pageX-touchStartX;
-			touchLengthY = event.targetTouches[0].oageY-touchStartY;
-		}
-	},true);
-	active.addEventListener("touchend" , function(event){
-		event.preventDefault();
-			if (touchLengthX > 30){
-				back();
-			}
-			if(touchLengthX < -30){
-				next();
-			}
-	},true);
-	active.addEventListener("touchcancel", function(event){event.preventDefault;},true);
-}
+UI.events.mouse = function(e){
+	if (e.button == 0){
+		if (e.clientX > (active.clientWidth/2)) {next();}
+		else {back()}
+	}
+};
+
+function navigation(add){
+	if (add){
+		window.addEventListener("keydown",UI.events.keyboard);
+		active.addEventListener("swipeleft", next);
+		active.addEventListener("swiperight", back);
+//		active.addEventListener("touchstart",UI.events.touchstart)
+//		active.addEventListener("touchmove",UI.events.touchmove)
+//		active.addEventListener("touchend" ,UI.events.touchend);
+//		active.addEventListener("touchcancel",UI.events.touchcancel);
+		active.addEventListener("mouseup",UI.events.mouse);
+	} else {
+		window.removeEventListener("keydown",UI.events.keyboard);
+		active.removeEventListener("swipeleft", next);
+		active.removeEventListener("swiperight", back);
+//		active.removeEventListener("touchstart",UI.events.touchstart)
+//		active.removeEventListener("touchmove",UI.events.touchmove)
+//		active.removeEventListener("touchend" ,UI.events.touchend);
+//		active.removeEventListener("touchcancel",UI.events.touchcancel);
+		active.removeEventListener("mouseup",UI.events.mouse);
+	}	
+}	
 
 function next(){
-	console.log("SubElemcount = " + subElemCount);
-	if ( count >= 0 && slides[count].subElem && subElemCount >= 0)
+	slideshow.next(active);
+	/*if ( count >= 0 && slides[count].subElem && subElemCount >= 0)
 	{
 		current = slides[count].subElem[subElemCount];
 		subElemCount++;
@@ -613,14 +595,14 @@ function next(){
 		} else {
 			document.getElementById("slide_content").innerHTML = "<button style='font-size:1em;position:relative;height:10%; width: 16%; top:45%;left:42%' onclick='first();'>Replay</button>";
 
-/*			if(ID){
+			if(ID){
 				jQuery.ajax({
 					type: 'GET',
 					url : "../put?id="+ID+"&ended=1",
 					success : function () {console.log("updated");}
 
 				});
-			}*/
+			}
 			if(window.fullScreenApi.isFullScreen){
 				//window.fullScreenApi.cancelFullScreen(document.body);
 			}
@@ -628,6 +610,7 @@ function next(){
 	}
 
 	console.log("SubElemcount = " + subElemCount);
+	*/
 }
 
 function hide(){
@@ -660,13 +643,68 @@ function load(){ //load element in current;
 
 
 
+function newSlide(){
+	var s = new Slide();
+	slide = slideshow.addSlide(s);
+	slideshow.currentSlide = slide;
+	slide.render(active,true);
+	addSlidePreview(slide);
+}
 
+function addSlidePreview(s, preview){
+        var preview = lib.selID('slides_preview');
+	var sp = lib.newEL('div',{className: 'slide thumb'});
+	sp.addEventListener('click', function(){
+		slideshow.render(s.id,active);
+		setEdit();
+		previewRender(s.id)
+	});
+	var length = preview.children.length;
+	preview.insertBefore(sp,preview.lastChild);
+	if (preview == preview || true){
+		previewRender();
+	}
+}
+
+function previewRender(id){
+	var collection = lib.selID('slides_preview').children;
+	for ( var i = 0; i < collection.length; i++){
+		var el = collection[i];
+		if (slideshow.currentSlide.id == i){
+			if (el.overlay && el.overlay.parentNode == el){
+				el.overlay.style.backgroundImage = "-moz-element(#slide_main)";
+			} else {
+				el.overlay = lib.newEL('div',{className:'thumb overlay'});
+				el.overlay.style.background = 'rgba(0,0,0,.5)';
+				el.overlay.style.backgroundImage = "-moz-element(#slide_main)";
+				el.overlay.style.backgroundSize = "cover";
+				el.appendChild(el.overlay);
+			}
+		} else if (slideshow.slides.length > i){
+			if (el.overlay && el.overlay.parentNode == el){
+				el.removeChild(el.overlay);
+				el.overlay = undefined;
+			}
+			if (el == el.parentNode.lastChild){ // don't override the new slide button
+				addSlidePreview({id: i},false);
+				el = collection[i];
+			}
+			//el.style.cssText = null;
+			slideshow.render(i,el, false);
+			lib.foreach(el.children,function(elem){
+				UI.draggable(elem,'remove');
+				UI.resizeable(elem,'remove');
+			});
+		}
+	}
+	lib.foreach(lib.sel('.slide.thumb'),function(el){slideResize(el)})
+}
 
 function resize( event )
 {	
 	if ( event != null && event.target != window){
 		// this is probably a text box resize
-		boxDrag(event,null);
+	//	boxDrag(event,null);
 		 return true;
 	}
 	winW = 630, winH = 460;
@@ -683,13 +721,11 @@ function resize( event )
 		slideH = winH;
 		active.style.width = slideW + "px";
 		active.style.left = ((winW-slideW) / 2) + "px";
-		//console.log("slideH="+winH+"slideW="+slideW);
 	} else{
 		slideH = winW/aspect;
 		slideW = winW;
 		active.style.height = slideH + "px";
 		active.style.top = ( (winH-slideH)/2) + "px";
-		//console.log("winH="+winH+", and slideH="+slideH);
 	}
 	active.style.width = slideW + "px";
 	active.style.left = ((winW-slideW) / 2) + "px";
@@ -698,9 +734,7 @@ function resize( event )
 	//var margins = ".03";//document.getElementByTag('slide_text')[0].style.margin;
 	//var textHeight = (slideW)/1024 * 30 + "px";
 	var textWidth = 2 * (slideW/1024)  + 'em';
-//	console.log("textWidth = "+textWidth);
 	active.style.fontSize=textWidth;
-	console.log(active);
 	winW = slideW;
 	winH = slideH;
 	var floats = document.getElementsByClassName('text_area');
@@ -712,4 +746,19 @@ function resize( event )
 		floats[i].style.width = floats[i].width * slideW + 'px';
 	}
 	
+}
+
+function slideResize(slide){
+
+	var width = slide.clientWidth;
+	var height = width/aspect;
+	slide.style.height = height + "px";
+	var textWidth = 2 * (width / 1024) + 'em';
+	slide.style.fontSize = textWidth;
+	lib.foreach(slide.querySelectorAll('.text_area'),function(el){
+		el.style.top= (el.top* height) + height/2 + 'px';
+		el.style.left = (el.left * width) + width/2 + 'px';
+		el.style.height = el.height * height + 'px';
+		el.style.width = el.width * width + 'px';
+	});
 }

@@ -31,7 +31,7 @@
 					onchange="load_slideshow();">
 				</input>
 			</span>
-			<a onclick="preview()"><button>Preview</button></a>
+			<button onclick="preview()">Preview</button>
 			<select onchange="updateAspect(this)" style="-moz-appearance:button-arrow-down">
 				<option value="1.777777778">16:9</option>
 				<option value="1.333333333">4:3</option>
@@ -39,6 +39,7 @@
 			</center>
 		</div>
 
+		<div id="slides_preview"><div class='slide' onclick='newSlide()' title="add new slide" style="background: rgba(0,0,0,0); border: 0 none"><i class='cross'></i></div></div>
 		<div id="container">
 			<div id="slide_screen" aria-labelledby="slide_screen" class="background">
 	

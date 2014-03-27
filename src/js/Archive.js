@@ -1,15 +1,4 @@
 (function(Archive){
-/*	Archive = function(blob){
-
-		this.resources = false;
-		this.header = { files: {} };
-		if (blob != undefined){
-			this.load(blob);
-		}
-	}*/
-
-
-
 	// helper functions
 
 	function getSizeAsUint32Array(blob){
@@ -34,10 +23,10 @@
 resources : false,
 header :	{ files: {} },
 
-		/* add( Blob, identifier, attribs)
-		 * Takes the blob to be added, an identifier i.e filename, and any atributes as an object
-		 * attributes may be in any format
-		 */
+	/* add( Blob, identifier, attribs)
+	 * Takes the blob to be added, an identifier i.e filename, and any atributes as an object
+	 * attributes may be in any format
+	 */
 add : function(blob, identifier, atribs){
 	      var self = this;
 	      var entry = {};
@@ -55,11 +44,18 @@ add : function(blob, identifier, atribs){
 	      }
 	      this.header.total = self.resources.size;
 	      console.log(entry);
-	      // todo doesn't handle colissions.
+	      // TODO: doesn't handle duplicates properly.
 	      self.header.files[identifier] = entry;
 	      return self.resources.slice(entry.start, entry.start + entry.length);
       },
 
+// TODO: add remove support
+
+
+	/* get( name ):
+ 	 * get file by name
+ 	 * returns blob of file with correct mime type.
+ 	 */
 get : function(name){
 	      var self = this;
 	      if (name in self.header.files){
@@ -68,7 +64,9 @@ get : function(name){
 		      return this.resources.slice(f.start,f.start + f.length,f.type);
 	      }
       },
-
+	/* list():
+	 * list files in blob
+ 	 */ 
 list : function(){
 	       var n = [];
 	       for (name in this.header.files){
@@ -78,8 +76,8 @@ list : function(){
 	},
 
 
-       /* returns the Archive being built.
-       */
+       /* returns the Archive being built as a blob.
+        */
 getBlob : function(){
 		  var self = this;
 		  var headBlob = new Blob([JSON.stringify(this.header)],{type:'application/json'});
@@ -87,6 +85,8 @@ getBlob : function(){
 		  return new Blob([sizeHeader,headBlob,this.resources],{type:'aplication/x-blob-archive'});
 	},
 
+	/* load archive from blob
+ 	 */ 
 load : function(Blob, calback){
 	       var self = this;
 	       self.header = {};
@@ -108,3 +108,5 @@ getResources : function(){return this.resources}
 	};
 }
 (window.Archive = window.Archive || function(blob){if (blob != undefined) this.load(blob)} ));
+
+

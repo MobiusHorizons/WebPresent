@@ -48,17 +48,18 @@ GetPackageManager(){
 ##################      Checks Modules    ###################
 checkModules(){
 
-	for m in ${!nodeModules[@]}
-	do
-		module=${nodeModules[$m]}
-		echo npm list $module \| grep  $module -q
-		npm list $module |grep $module -q
-		if [ $? -ne 0 ] ; then
-			echo "installing grunt module $m "
-			$SUDO $NPM install $module
-			if [ $? -ne 0 ];then exit 3;fi
-		fi
-	done
+	$SUDO $NPM install
+#	for m in ${!nodeModules[@]}
+#	do
+#		module=${nodeModules[$m]}
+#		echo npm list $module \| grep  $module -q
+#		npm list $module |grep $module -q
+#		if [ $? -ne 0 ] ; then
+#			echo "installing grunt module $m "
+#			$SUDO $NPM install $module
+#			if [ $? -ne 0 ];then exit 3;fi
+#		fi
+#	done
 }
 
 ##################      Check for npm    ###################

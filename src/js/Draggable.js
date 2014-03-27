@@ -19,6 +19,7 @@ UI.draggable.mousedown = function(elem, e){
 	console.log('starting drag');
 	console.log(elem.offsetLeft);
 	console.log(elem.offsetTop);
+	elem.setAttribute('draggable','false'); // so we don't get drag and drop.
 	var old = {};
 	old.mov = window.onmousemove;
 	old.up = window.onmouseup;
@@ -26,6 +27,7 @@ UI.draggable.mousedown = function(elem, e){
 	window.onmouseup = function(){
 		window.onmousemove = old.mov; window.onmouseup = old.up;
 		elem.draggableOffsetX = undefined; 
+		elem.setAttribute('draggable','auto'); 
 		elem.draggableOffsetY = undefined; 
 		elem.ontransformed({target: elem});
 	}
