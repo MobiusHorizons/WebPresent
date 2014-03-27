@@ -7,19 +7,20 @@
 UI.draggable = function(elem, verb, attrs){
 	if (verb == 'set'){
 		elem.onmousedown = function(e){UI.draggable.mousedown(elem,e)};
+		elem.setAttribute('draggable','false'); // so we don't get drag and drop.
 	} 
 	if (verb == "unset" || verb == "remove" || verb == "none"){
 		elem.onmousedown = null;
+		elem.setAttribute('draggable','auto'); 
 	}
 }
 UI.draggable.mousedown = function(elem, e){
 	elem.draggableOffsetX = e.clientX - elem.offsetLeft;
 	elem.draggableOffsetY = e.clientY - elem.offsetTop;
-	console.log(e);
-	console.log('starting drag');
-	console.log(elem.offsetLeft);
-	console.log(elem.offsetTop);
-	elem.setAttribute('draggable','false'); // so we don't get drag and drop.
+	//console.log(e);
+	//console.log('starting drag');
+	//console.log(elem.offsetLeft);
+	//console.log(elem.offsetTop);
 	var old = {};
 	old.mov = window.onmousemove;
 	old.up = window.onmouseup;
@@ -27,11 +28,10 @@ UI.draggable.mousedown = function(elem, e){
 	window.onmouseup = function(){
 		window.onmousemove = old.mov; window.onmouseup = old.up;
 		elem.draggableOffsetX = undefined; 
-		elem.setAttribute('draggable','auto'); 
 		elem.draggableOffsetY = undefined; 
 		elem.ontransformed({target: elem});
 	}
-	console.log(elem.draggableOffsetX +":"+ elem.draggableOffsetY);
+	//console.log(elem.draggableOffsetX +":"+ elem.draggableOffsetY);
 }
 
 UI.draggable.getSnapCoords = function(elem, snapselectors){
