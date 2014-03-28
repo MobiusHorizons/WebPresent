@@ -1481,7 +1481,7 @@ function changeBG(){
 			return false;
 		console.log(file);
 		active.style.backgroundImage="url("+URL.createObjectURL(file) +")";
-        	slide.setBackground(file,file.name); 
+        	slideshow.currentSlide.setBackground(file,file.name); 
 		var event = new CustomEvent("updated")
 		active.dispatchEvent(event);
 		return true;
@@ -1604,7 +1604,7 @@ function Add_elem(type){
 					}
 				};
 
-			slide.add(textArea,'image',[rl]);
+			slideshow.currentSlide.add(textArea,'image',[rl]);
 			active.appendChild(textArea);
 			boxDrag({target:textArea});
 			borders(true);
