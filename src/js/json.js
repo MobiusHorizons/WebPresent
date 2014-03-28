@@ -329,6 +329,7 @@ function changeBG(){
 
 
 function Add_elem(type){
+	slide = slideshow.currentSlide;
 	if (type == "text_area"){
 		ID_CT = slide.nextID();
 		var textArea = document.createElement('div');
@@ -349,10 +350,11 @@ function Add_elem(type){
 		UI.resizeable(textArea,'set');
 		UI.draggable(textArea,'set');
 		textArea.ontransformed = boxDrag;
+		boxDrag({target:textArea}); // save dimentions.
 		slide.add(textArea,'text',[]);
 		borders(true);
-		var event = new CustomEvent("updated",{canBubble:true});
-		textArea.dispatchEvent(event);
+		//var event = new CustomEvent("updated",{canBubble:true});
+		//textArea.dispatchEvent(event);
 	return textArea;
 	} else if (type == "image"){
 		ID_CT = slide.nextID();
@@ -385,8 +387,7 @@ function Add_elem(type){
 
 			slide.add(body,'image',[rl]);
 			active.appendChild(body);
-			var event = new CustomEvent("updated",{canBubble:true})
-			body.dispatchEvent(event);
+			boxDrag({target:body}); // save dimentions.
 			borders(true);
 		}
 		image_preview.show();
@@ -421,8 +422,7 @@ function Add_elem(type){
 
 			slide.add(textArea,'image',[rl]);
 			active.appendChild(textArea);
-			var event = new CustomEvent("updated",{canBubble:true})
-			textArea.dispatchEvent(event);
+			boxDrag({target:textArea});
 			borders(true);
 		}
 		image_preview.show();
@@ -645,7 +645,7 @@ function addSlidePreview(s, preview){
         var preview = lib.selID('slides_preview');
 	var sp = lib.newEL('div',{className: 'slide thumb'});
 	sp.addEventListener('click', function(){
-		slideshow.render(s.id,active);
+		slideshow.render(s.id,active,true);
 		setEdit();
 		previewRender(s.id)
 	});
@@ -668,10 +668,14 @@ function addSlidePreview(s, preview){
 
 function previewRender(id){
 	var collection = lib.selID('slides_preview').children;
+		console.log(slideshow.currentSlide.id);
 	for ( var i = 0; i < collection.length; i++){
 		var el = collection[i];
+		console.log('preview #'+i+", slide #"+slideshow.currentSlide.id);
 		if (slideshow.currentSlide.id == i){
+			console.log(el.overlay);
 			if (el.overlay && el.overlay.parentNode == el){
+				el.overlay.style.background = 'rgba(0,0,0,.5)';
 				el.overlay.style.backgroundImage = "-moz-element(#slide_main)";
 			} else {
 				el.overlay = lib.newEL('div',{className:'thumb overlay'});

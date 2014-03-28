@@ -1032,8 +1032,7 @@ UI.resizeable.mousemove = function(elem, e){
 			}
 		},
 		render : function(id, screen, setCurrent){
-			if (setCurrent == undefined){ setCurrent = true; }
-			else { console.log('currentSide updating to ' + id)};
+			if (setCurrent == undefined) setCurrent= true;
 			var self = this;
 			if (id >=0 && id < self.slides.length){
 				self.slides[id].render(screen);
@@ -1268,8 +1267,10 @@ function view(preview){
 		UI.resizeable(child,'remove');
 		UI.draggable(child,'remove');
 		var ce = child.querySelector(".content-editable");
-			ce.setAttribute('contenteditable',false);
-			ce.spellcheck = false;
+			if(!!ce){
+				ce.setAttribute('contenteditable',false);
+				ce.spellcheck = false;
+			}
 	});
 	if (!p){
 		active.removeEventListener('contextmenu',addItemMenu);
@@ -1295,7 +1296,7 @@ function boxDrag(event, ui){
 	t.left = (event.target.offsetLeft - (winW/2))/ winW;
 	t.height = (event.target.clientHeight/winH);
 	t.width = (event.target.clientWidth/winW);
-	var event = new CustomEvent("updated",{bubble:true})
+	var event = new CustomEvent("updated",{canBubble:true})
 	t.dispatchEvent(event);
 	
 }
@@ -1313,8 +1314,10 @@ function setEdit(preview){
 		UI.resizeable(child,'set');
 		UI.draggable(child,'set');
 		var ce = child.querySelector(".content-editable");
+			if(!!ce){
 				ce.setAttribute('contenteditable',true);
 				ce.spellcheck = false;
+			}
 		child.ontransformed = boxDrag;
 	})
 	if (!p){
@@ -1480,7 +1483,7 @@ function changeBG(){
 		active.style.backgroundImage="url("+URL.createObjectURL(file) +")";
         	slide.setBackground(file,file.name); 
 		var event = new CustomEvent("updated")
-		slide.dispatchEvent(event);
+		active.dispatchEvent(event);
 		return true;
 	};
 	bgChooser.show();		
@@ -1510,6 +1513,7 @@ function changeBG(){
 
 
 function Add_elem(type){
+	slide = slideshow.currentSlide;
 	if (type == "text_area"){
 		ID_CT = slide.nextID();
 		var textArea = document.createElement('div');
@@ -1530,10 +1534,11 @@ function Add_elem(type){
 		UI.resizeable(textArea,'set');
 		UI.draggable(textArea,'set');
 		textArea.ontransformed = boxDrag;
+		boxDrag({target:textArea}); // save dimentions.
 		slide.add(textArea,'text',[]);
 		borders(true);
-		var event = new CustomEvent("updated",{bubble:true});
-		textArea.dispatchEvent(event);
+		//var event = new CustomEvent("updated",{canBubble:true});
+		//textArea.dispatchEvent(event);
 	return textArea;
 	} else if (type == "image"){
 		ID_CT = slide.nextID();
@@ -1566,8 +1571,7 @@ function Add_elem(type){
 
 			slide.add(body,'image',[rl]);
 			active.appendChild(body);
-			var event = new CustomEvent("updated")
-			slide.dispatchEvent(event);
+			boxDrag({target:body}); // save dimentions.
 			borders(true);
 		}
 		image_preview.show();
@@ -1602,8 +1606,7 @@ function Add_elem(type){
 
 			slide.add(textArea,'image',[rl]);
 			active.appendChild(textArea);
-			var event = new CustomEvent("updated")
-			slide.dispatchEvent(event);
+			boxDrag({target:textArea});
 			borders(true);
 		}
 		image_preview.show();
@@ -1826,13 +1829,20 @@ function addSlidePreview(s, preview){
         var preview = lib.selID('slides_preview');
 	var sp = lib.newEL('div',{className: 'slide thumb'});
 	sp.addEventListener('click', function(){
-		slideshow.render(s.id,active);
+		slideshow.render(s.id,active,true);
 		setEdit();
 		previewRender(s.id)
 	});
-	sp.addEventListener('updated',function(e){
-		console.log(e);
-	});
+	active.addEventListener('updated',function(e){
+		console.log('updated ' + s.id);
+		if (slideshow.currentSlide.id == s.id){
+			// update slide;
+			if (sp.style.backgroundImage != active.style.backgroundImage){
+				sp.style.backgroundImage = active.style.backgroundImage;
+			}
+		}
+		
+	}, true);
 	var length = preview.children.length;
 	preview.insertBefore(sp,preview.lastChild);
 	if (preview = preview || true){
@@ -1842,10 +1852,14 @@ function addSlidePreview(s, preview){
 
 function previewRender(id){
 	var collection = lib.selID('slides_preview').children;
+		console.log(slideshow.currentSlide.id);
 	for ( var i = 0; i < collection.length; i++){
 		var el = collection[i];
+		console.log('preview #'+i+", slide #"+slideshow.currentSlide.id);
 		if (slideshow.currentSlide.id == i){
+			console.log(el.overlay);
 			if (el.overlay && el.overlay.parentNode == el){
+				el.overlay.style.background = 'rgba(0,0,0,.5)';
 				el.overlay.style.backgroundImage = "-moz-element(#slide_main)";
 			} else {
 				el.overlay = lib.newEL('div',{className:'thumb overlay'});
