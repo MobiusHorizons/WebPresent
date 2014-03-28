@@ -651,11 +651,32 @@ function addSlidePreview(s, preview){
 	});
 	active.addEventListener('updated',function(e){
 		console.log('updated ' + s.id);
-		if (slideshow.currentSlide.id == s.id){
+		if (slideshow.currentSlide.id == s.id){ // i am active
 			// update slide;
 			if (sp.style.backgroundImage != active.style.backgroundImage){
 				sp.style.backgroundImage = active.style.backgroundImage;
 			}
+			console.log(e);
+			console.log(sp.children.length);
+			if (sp.children.length == active.children.length){ // created
+				var newEL = e.srcElement.cloneNode(true);
+				newEL.top    = e.srcElement.top;
+				newEL.left   = e.srcElement.left;
+				newEL.width  = e.srcElement.width;
+				newEL.height = e.srcElement.height;
+				e.srcElement.index = sp.children.length; 
+				sp.appendChild(newEL);
+			} else { // update
+				var newEL = e.srcElement.cloneNode(true);
+				newEL.top    = e.srcElement.top;
+				newEL.left   = e.srcElement.left;
+				newEL.width  = e.srcElement.width;
+				newEL.height = e.srcElement.height;
+				var idx = e.srcElement.index ; //|| 0; // fail silently
+				sp.removeChild(sp.children[idx]);
+				sp.insertBefore(newEL, sp.children[idx]);
+			}
+			slideResize(sp);
 		}
 		
 	}, true);
@@ -752,17 +773,18 @@ function resize( event )
 	
 }
 
-function slideResize(slide){
+function slideResize(s){
 
-	var width = slide.parentNode.clientWidth;
+	var width = s.clientWidth;
 	var height = width/aspect;
-	slide.style.height = height + "px";
+	s.style.height = height + "px";
 	var textWidth = 2 * (width / 1024) + 'em';
-	slide.style.fontSize = textWidth;
-	lib.foreach(slide.querySelectorAll('.text_area'),function(el){
+	s.style.fontSize = textWidth;
+	lib.foreach(s.querySelectorAll('.text_area'),function(el){
 		el.style.top= (el.top* height) + height/2 + 'px';
 		el.style.left = (el.left * width) + width/2 + 'px';
 		el.style.height = el.height * height + 'px';
 		el.style.width = el.width * width + 'px';
+		console.log(el);
 	});
 }
