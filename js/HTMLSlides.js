@@ -1192,7 +1192,7 @@ var touchStartY = 0;
 var subElemCount=0;
 var level=0;
 var remote=false;
-var edit;
+var edit = true;
 var active=null;
 var background=null;
 var slide_background = "";
@@ -1257,7 +1257,12 @@ function borders(display){
  */
 function view(preview){
 	var p = preview || false;
-	lib.foreach(lib.sel('#toolbar,#container, #slide_main,#slidespreview'),function(el){el.dataset.edit=false})
+	lib.foreach(lib.sel('#toolbar,#container, #slide_main,#slidespreview'),function(el){
+		if (el.dataset)
+			el.dataset.edit=false
+		else
+			el.setAttribute('data-edit',"false");
+	})
 	borders(false);
 	lib.foreach(active.children,function(child,i){
 		UI.resizeable(child,'remove');
@@ -1285,15 +1290,24 @@ function preview(){
 }
 
 function boxDrag(event, ui){
-	event.target.top = (event.target.offsetTop - ( winH/2 )) / winH ;
-	event.target.left = (event.target.offsetLeft - (winW/2))/ winW;
-	event.target.height = (event.target.clientHeight/winH);
-	event.target.width = (event.target.clientWidth/winW);
+	var t = event.target;
+	t.top = (event.target.offsetTop - ( winH/2 )) / winH ;
+	t.left = (event.target.offsetLeft - (winW/2))/ winW;
+	t.height = (event.target.clientHeight/winH);
+	t.width = (event.target.clientWidth/winW);
+	var event = new CustomEvent("updated",{bubble:true})
+	t.dispatchEvent(event);
+	
 }
 
 function setEdit(preview){
 	var p = preview || false;
-	lib.foreach(lib.sel('#toolbar,#container, #slide_main,#slides_preview'),function(el){el.dataset.edit=true})
+	lib.foreach(lib.sel('#toolbar,#container, #slide_main,#slides_preview'),function(el){
+		if (el.dataset)
+			el.dataset.edit=true
+		else 
+			el.setAttribute('data-edit','true');
+	})
 	borders(true);
 	lib.foreach(active.children,function(child,i){
 		UI.resizeable(child,'set');
@@ -1389,7 +1403,7 @@ function initialize(){
 	
 	slideshow = new SlideShow();
 	active = document.getElementById("slide_main");
-	UI.touch(active);
+	//UI.touch(active);
 	newSlide();
 	emSize = getDefaultFontSize(active);
 	resize();
@@ -1465,6 +1479,8 @@ function changeBG(){
 		console.log(file);
 		active.style.backgroundImage="url("+URL.createObjectURL(file) +")";
         	slide.setBackground(file,file.name); 
+		var event = new CustomEvent("updated")
+		slide.dispatchEvent(event);
 		return true;
 	};
 	bgChooser.show();		
@@ -1499,7 +1515,6 @@ function Add_elem(type){
 		var textArea = document.createElement('div');
 			//textArea.setAttribute('id','outer' + ID_CT);
 			textArea.setAttribute('class','text_area');
-//		UI.draggable(textArea, 'set');
 		var handle = document.createElement('div');
 			handle.setAttribute('class','handle');
 			textArea.appendChild(handle);
@@ -1516,44 +1531,32 @@ function Add_elem(type){
 		UI.draggable(textArea,'set');
 		textArea.ontransformed = boxDrag;
 		slide.add(textArea,'text',[]);
-
 		borders(true);
+		var event = new CustomEvent("updated",{bubble:true});
+		textArea.dispatchEvent(event);
 	return textArea;
 	} else if (type == "image"){
 		ID_CT = slide.nextID();
-		var textArea = document.createElement('div');
+		var body = document.createElement('div');
 			//textArea.setAttribute('id','outer' + ID_CT);
-			textArea.setAttribute('class','text_area');
+			body.setAttribute('class','text_area slide-element-body');
 		var handle = document.createElement('div');
 			handle.setAttribute('class','handle');
-			textArea.appendChild(handle);
+			body.appendChild(handle);
 		var img = document.createElement('div');
-				//img.setAttribute('id',ID_CT);
 				img.setAttribute('class','slide_text slide_img');
-				textArea.appendChild(img);
-		UI.resizeable(textArea,'set');
-		UI.draggable(textArea,'set');
-		textArea.ontransformed = boxDrag;
+				body.appendChild(img);
+		UI.resizeable(body,'set');
+		UI.draggable(body,'set');
+		body.ontransformed = boxDrag;
 
-		textArea.style.top = lastClick.clientY + 'px';
-		textArea.style.left = lastClick.clientX + 'px';
-/*		for(i=1;i<=ID_CT;i++){
-			UI.resizeable(lib.selID('outer' + i), 'set');
-			UI.draggable(lib.selID('outer' + i), 'set', {snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
-			lib.selID(i).setAttribute('contenteditable',true);
-			lib.selID('outer'+i).ondragstop = boxDrag;
-			//	$('#outer'+i).resizable();
-			//	$('#outer'+i).resizable( "destroy" );
-			//	$('#outer'+i).resizable();
-                	//	$('#outer'+i).draggable({snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
-			//	$('#outer'+i).on('dragstop',boxDrag);
-		}*/
-		//clear_UI_modal();
+		body.style.top = lastClick.clientY + 'px';
+		body.style.left = lastClick.clientX + 'px';
 		var image_preview = new Preview({type:'image'});
 		image_preview.onselected = function(file){
 			img.style.backgroundImage = 'url(' + URL.createObjectURL(file) + ')';
-			textArea.links = [];
-			textArea.links.push("img.style.backgroundImage",file.name);
+			body.links = [];
+			body.links.push("img.style.backgroundImage",file.name);
 			var rl = {'resource' : file,
 				  'link' : {
 					'type': 'css',
@@ -1561,8 +1564,10 @@ function Add_elem(type){
 					}
 				};
 
-			slide.add(textArea,'image',[rl]);
-			active.appendChild(textArea);
+			slide.add(body,'image',[rl]);
+			active.appendChild(body);
+			var event = new CustomEvent("updated")
+			slide.dispatchEvent(event);
 			borders(true);
 		}
 		image_preview.show();
@@ -1597,6 +1602,9 @@ function Add_elem(type){
 
 			slide.add(textArea,'image',[rl]);
 			active.appendChild(textArea);
+			var event = new CustomEvent("updated")
+			slide.dispatchEvent(event);
+			borders(true);
 		}
 		image_preview.show();
 		return textArea;
@@ -1822,9 +1830,12 @@ function addSlidePreview(s, preview){
 		setEdit();
 		previewRender(s.id)
 	});
+	sp.addEventListener('updated',function(e){
+		console.log(e);
+	});
 	var length = preview.children.length;
 	preview.insertBefore(sp,preview.lastChild);
-	if (preview == preview || true){
+	if (preview = preview || true){
 		previewRender();
 	}
 }
@@ -1913,7 +1924,7 @@ function resize( event )
 
 function slideResize(slide){
 
-	var width = slide.clientWidth;
+	var width = slide.parentNode.clientWidth;
 	var height = width/aspect;
 	slide.style.height = height + "px";
 	var textWidth = 2 * (width / 1024) + 'em';

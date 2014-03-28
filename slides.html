@@ -1879,8 +1879,10 @@
 				UI.resizeable(child,'remove');
 				UI.draggable(child,'remove');
 				var ce = child.querySelector(".content-editable");
-					ce.setAttribute('contenteditable',false);
-					ce.spellcheck = false;
+					if(!!ce){
+						ce.setAttribute('contenteditable',false);
+						ce.spellcheck = false;
+					}
 			});
 			if (!p){
 				active.removeEventListener('contextmenu',addItemMenu);
@@ -1901,10 +1903,14 @@
 		}
 		
 		function boxDrag(event, ui){
-			event.target.top = (event.target.offsetTop - ( winH/2 )) / winH ;
-			event.target.left = (event.target.offsetLeft - (winW/2))/ winW;
-			event.target.height = (event.target.clientHeight/winH);
-			event.target.width = (event.target.clientWidth/winW);
+			var t = event.target;
+			t.top = (event.target.offsetTop - ( winH/2 )) / winH ;
+			t.left = (event.target.offsetLeft - (winW/2))/ winW;
+			t.height = (event.target.clientHeight/winH);
+			t.width = (event.target.clientWidth/winW);
+			var event = new CustomEvent("updated",{canBubble:true})
+			t.dispatchEvent(event);
+			
 		}
 		
 		function setEdit(preview){
@@ -1920,8 +1926,10 @@
 				UI.resizeable(child,'set');
 				UI.draggable(child,'set');
 				var ce = child.querySelector(".content-editable");
+					if(!!ce){
 						ce.setAttribute('contenteditable',true);
 						ce.spellcheck = false;
+					}
 				child.ontransformed = boxDrag;
 			})
 			if (!p){
@@ -2086,6 +2094,8 @@
 				console.log(file);
 				active.style.backgroundImage="url("+URL.createObjectURL(file) +")";
 		        	slide.setBackground(file,file.name); 
+				var event = new CustomEvent("updated")
+				active.dispatchEvent(event);
 				return true;
 			};
 			bgChooser.show();		
@@ -2120,7 +2130,6 @@
 				var textArea = document.createElement('div');
 					//textArea.setAttribute('id','outer' + ID_CT);
 					textArea.setAttribute('class','text_area');
-		//		UI.draggable(textArea, 'set');
 				var handle = document.createElement('div');
 					handle.setAttribute('class','handle');
 					textArea.appendChild(handle);
@@ -2137,44 +2146,32 @@
 				UI.draggable(textArea,'set');
 				textArea.ontransformed = boxDrag;
 				slide.add(textArea,'text',[]);
-		
 				borders(true);
+				var event = new CustomEvent("updated",{canBubble:true});
+				textArea.dispatchEvent(event);
 			return textArea;
 			} else if (type == "image"){
 				ID_CT = slide.nextID();
-				var textArea = document.createElement('div');
+				var body = document.createElement('div');
 					//textArea.setAttribute('id','outer' + ID_CT);
-					textArea.setAttribute('class','text_area');
+					body.setAttribute('class','text_area slide-element-body');
 				var handle = document.createElement('div');
 					handle.setAttribute('class','handle');
-					textArea.appendChild(handle);
+					body.appendChild(handle);
 				var img = document.createElement('div');
-						//img.setAttribute('id',ID_CT);
 						img.setAttribute('class','slide_text slide_img');
-						textArea.appendChild(img);
-				UI.resizeable(textArea,'set');
-				UI.draggable(textArea,'set');
-				textArea.ontransformed = boxDrag;
+						body.appendChild(img);
+				UI.resizeable(body,'set');
+				UI.draggable(body,'set');
+				body.ontransformed = boxDrag;
 		
-				textArea.style.top = lastClick.clientY + 'px';
-				textArea.style.left = lastClick.clientX + 'px';
-		/*		for(i=1;i<=ID_CT;i++){
-					UI.resizeable(lib.selID('outer' + i), 'set');
-					UI.draggable(lib.selID('outer' + i), 'set', {snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
-					lib.selID(i).setAttribute('contenteditable',true);
-					lib.selID('outer'+i).ondragstop = boxDrag;
-					//	$('#outer'+i).resizable();
-					//	$('#outer'+i).resizable( "destroy" );
-					//	$('#outer'+i).resizable();
-		                	//	$('#outer'+i).draggable({snap:'.text_area, #slide_main', snapMode:'both', cancel: "div.slide_text"});
-					//	$('#outer'+i).on('dragstop',boxDrag);
-				}*/
-				//clear_UI_modal();
+				body.style.top = lastClick.clientY + 'px';
+				body.style.left = lastClick.clientX + 'px';
 				var image_preview = new Preview({type:'image'});
 				image_preview.onselected = function(file){
 					img.style.backgroundImage = 'url(' + URL.createObjectURL(file) + ')';
-					textArea.links = [];
-					textArea.links.push("img.style.backgroundImage",file.name);
+					body.links = [];
+					body.links.push("img.style.backgroundImage",file.name);
 					var rl = {'resource' : file,
 						  'link' : {
 							'type': 'css',
@@ -2182,8 +2179,10 @@
 							}
 						};
 		
-					slide.add(textArea,'image',[rl]);
-					active.appendChild(textArea);
+					slide.add(body,'image',[rl]);
+					active.appendChild(body);
+					var event = new CustomEvent("updated",{canBubble:true})
+					body.dispatchEvent(event);
 					borders(true);
 				}
 				image_preview.show();
@@ -2218,6 +2217,9 @@
 		
 					slide.add(textArea,'image',[rl]);
 					active.appendChild(textArea);
+					var event = new CustomEvent("updated",{canBubble:true})
+					textArea.dispatchEvent(event);
+					borders(true);
 				}
 				image_preview.show();
 				return textArea;
@@ -2443,6 +2445,16 @@
 				setEdit();
 				previewRender(s.id)
 			});
+			active.addEventListener('updated',function(e){
+				console.log('updated ' + s.id);
+				if (slideshow.currentSlide.id == s.id){
+					// update slide;
+					if (sp.style.backgroundImage != active.style.backgroundImage){
+						sp.style.backgroundImage = active.style.backgroundImage;
+					}
+				}
+				
+			}, true);
 			var length = preview.children.length;
 			preview.insertBefore(sp,preview.lastChild);
 			if (preview = preview || true){
