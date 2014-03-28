@@ -113,8 +113,7 @@
 			}
 		},
 		render : function(id, screen, setCurrent){
-			if (setCurrent == undefined){ setCurrent = true; }
-			else { console.log('currentSide updating to ' + id)};
+			if (setCurrent == undefined) setCurrent= true;
 			var self = this;
 			if (id >=0 && id < self.slides.length){
 				self.slides[id].render(screen);
