@@ -516,7 +516,8 @@ i.cross:hover:before, i.cross:hover:after{
 	text-align: left;
 	text-shadow: 0 0 0.2em black, 0 0 0.2em black,0 0 0.2em gray;
 	color: white;
-	min-height: 5px;
+	height: calc(100%-.5em);
+	margin: .5em;
 }
 
 .slide_text h2{
@@ -532,15 +533,17 @@ i.cross:hover:before, i.cross:hover:after{
 [contenteditable="true"]:active,
 [contenteditable="true"]:focus{
     border:none;
-    outline:none;
+    outline:none; 	
 }
 .slide_img {
 	height:100%;
 	width:100%;
+	margin:0px;
 	background-repeat:no-repeat;
 	background-position: center;
 	background-origin:center;
 	background-size:cover;
+	cursor: inherit;
 }
 
 .handle{

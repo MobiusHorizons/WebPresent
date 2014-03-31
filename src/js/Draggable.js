@@ -6,7 +6,7 @@
 
 UI.draggable = function(elem, verb, attrs){
 	if (verb == 'set'){
-		elem.onmousedown = function(e){UI.draggable.mousedown(elem,e)};
+		elem.onmousedown = function(e){UI.draggable.mousedown(elem,attrs,e)};
 		elem.setAttribute('draggable','false'); // so we don't get drag and drop.
 	} 
 	if (verb == "unset" || verb == "remove" || verb == "none"){
@@ -14,7 +14,7 @@ UI.draggable = function(elem, verb, attrs){
 		elem.setAttribute('draggable','auto'); 
 	}
 }
-UI.draggable.mousedown = function(elem, e){
+UI.draggable.mousedown = function(elem,attrs, e){
 	elem.draggableOffsetX = e.clientX - elem.offsetLeft;
 	elem.draggableOffsetY = e.clientY - elem.offsetTop;
 	//console.log(e);
@@ -22,6 +22,9 @@ UI.draggable.mousedown = function(elem, e){
 	//console.log(elem.offsetLeft);
 	//console.log(elem.offsetTop);
 	var old = {};
+	if (attrs && attrs.cancel && lib.matches(e.target,attrs.cancel)){
+		return;
+	}
 	old.mov = window.onmousemove;
 	old.up = window.onmouseup;
 	window.onmousemove = function(e2){UI.draggable.mousemove(elem,e2)};

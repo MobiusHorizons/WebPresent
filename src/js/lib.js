@@ -52,6 +52,25 @@
 		return elem;		
 	}
 
+	lib.matches = function(elem, selector){
+		if (elem.webkitMatchesSelector){
+			return elem.webkitMatchesSelector(selector);
+		}
+		else if (elem.mozMatchesSelector){
+			return elem.mozMatchesSelector(selector);
+		} else if (elem.msMatchesSelector){
+			return elem.msMatchesSelector(selector);
+		} else if (elem.matches){
+			return elem.matches(selector);
+		} else {
+			var collection = elem.parentNode.querySelectorAll(selector);
+			for ( var i = 0; i < collection.length; i ++){
+				if (collection[i] == elem) return true;
+			}
+			return false;
+		}
+	}
+
 	lib.newEL = function(type,object){
 		var e = document.createElement(type);
 		lib.foreach(object,function(val,name){
