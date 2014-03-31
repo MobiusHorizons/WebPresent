@@ -369,8 +369,6 @@ function Add_elem(type){
 		var img = document.createElement('div');
 				img.setAttribute('class','slide_text slide_img');
 				body.appendChild(img);
-		UI.resizeable(body,'set');
-		UI.draggable(body,'set');
 		body.ontransformed = boxDrag;
 
 		body.style.top = (lastClick.y||10) + 'px';
@@ -389,6 +387,8 @@ function Add_elem(type){
 
 			slide.add(body,'image',[rl]);
 			active.appendChild(body);
+			UI.resizeable(body,'set');
+			UI.draggable(body,'set');
 			boxDrag({target:body}); // save dimentions.
 			borders(true);
 		}
@@ -408,8 +408,6 @@ function Add_elem(type){
 				img.setAttribute('controls',true);
 				textArea.appendChild(img);
 	
-		UI.resizeable(textArea,'set');
-		UI.draggable(textArea,'set');
 		textArea.style.top = (lastClick.y||10) + 'px';
 		textArea.style.left = (lastClick.x||10) + 'px';
 		var image_preview = new Preview({type:'video'});
@@ -424,6 +422,8 @@ function Add_elem(type){
 
 			slideshow.currentSlide.add(textArea,'image',[rl]);
 			active.appendChild(textArea);
+			UI.resizeable(textArea,'set');
+			UI.draggable(textArea,'set');
 			boxDrag({target:textArea});
 			borders(true);
 		}
