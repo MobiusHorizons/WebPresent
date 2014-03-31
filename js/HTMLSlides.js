@@ -286,7 +286,7 @@ else var Blob = (function (view) {
 
 UI.draggable = function(elem, verb, attrs){
 	if (verb == 'set'){
-		elem.touchstart = function(e){UI.draggable.mousedown(elem,attrs,e.touches[0])};
+		elem.touchstart = function(e){e.preventDefault();UI.draggable.mousedown(elem,attrs,e.touches[0])};
 		elem.onmousedown = function(e){UI.draggable.mousedown(elem,attrs,e)};
 		window.addEventListener('touchstart',elem.touchstart);
 		elem.setAttribute('draggable','false'); // so we don't get drag and drop.
@@ -746,6 +746,7 @@ UI.resizeable = function(element, verb, attrs){
 			UI.resizeable.mousedown(element, e);
 		}
 		element.resizeHandle.addEventListener('touchstart',function(e){
+			e.preventDefault();
 			console.log(e)
 			e.cancelBubble = true;
 			UI.resizeable.mousedown(element,e.touches[0])

@@ -6,7 +6,7 @@
 
 UI.draggable = function(elem, verb, attrs){
 	if (verb == 'set'){
-		elem.touchstart = function(e){UI.draggable.mousedown(elem,attrs,e.touches[0])};
+		elem.touchstart = function(e){e.preventDefault();UI.draggable.mousedown(elem,attrs,e.touches[0])};
 		elem.onmousedown = function(e){UI.draggable.mousedown(elem,attrs,e)};
 		window.addEventListener('touchstart',elem.touchstart);
 		elem.setAttribute('draggable','false'); // so we don't get drag and drop.
