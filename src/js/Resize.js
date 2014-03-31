@@ -32,6 +32,7 @@ UI.resizeable = function(element, verb, attrs){
 			UI.resizeable.mousedown(element, e);
 		}
 		element.resizeHandle.addEventListener('touchstart',function(e){
+			e.preventDefault();
 			console.log(e)
 			e.cancelBubble = true;
 			UI.resizeable.mousedown(element,e.touches[0])
