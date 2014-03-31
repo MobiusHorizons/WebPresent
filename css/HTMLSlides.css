@@ -374,12 +374,13 @@ body {
 
 .text_area{
 	position:absolute;
-	height:2em;
+	height: 20%;
 	overflow:hidden;
-	width:10%;
+	width:20%;
 }
 
 .slide[data-edit='true'] .text_area{
+	overflow:visible;
 	cursor:move;
 	border:1px dotted white;
 	box-shadow: 0px 0px 0.2em black, 0px 0px 0.2em black, 0px 0px 0.2em gray;
@@ -516,8 +517,7 @@ i.cross:hover:before, i.cross:hover:after{
 	text-align: left;
 	text-shadow: 0 0 0.2em black, 0 0 0.2em black,0 0 0.2em gray;
 	color: white;
-	height: calc(100%-.5em);
-	margin: .5em;
+	height: 100%;
 }
 
 .slide_text h2{
@@ -554,10 +554,10 @@ i.cross:hover:before, i.cross:hover:after{
 	display: block;
 	position: absolute;
 	background-color:rgba(0,0,0,.5);
-	top: 0px;
-	left: 0px;
-	width: 20px;
-	height: 20px;
+	top: -0.5em;
+	left: -0.5em;
+	width: 1em;
+	height: 1em;
 }
 
 .fileUpload {

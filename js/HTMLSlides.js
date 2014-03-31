@@ -286,11 +286,16 @@ else var Blob = (function (view) {
 
 UI.draggable = function(elem, verb, attrs){
 	if (verb == 'set'){
+		elem.touchstart = function(e){UI.draggable.mousedown(elem,attrs,e.touches[0])};
 		elem.onmousedown = function(e){UI.draggable.mousedown(elem,attrs,e)};
+		window.addEventListener('touchstart',elem.touchstart);
 		elem.setAttribute('draggable','false'); // so we don't get drag and drop.
 	} 
 	if (verb == "unset" || verb == "remove" || verb == "none"){
 		elem.onmousedown = null;
+		if (elem.touchstart ){
+			window.removeEventListener('touchstart',elem.touchstart);
+		}
 		elem.setAttribute('draggable','auto'); 
 	}
 }
@@ -308,12 +313,17 @@ UI.draggable.mousedown = function(elem,attrs, e){
 	old.mov = window.onmousemove;
 	old.up = window.onmouseup;
 	window.onmousemove = function(e2){UI.draggable.mousemove(elem,e2)};
+	var touchmove = function(e2){UI.draggable.mousemove(elem,e2.touches[0])}
+	window.addEventListener('touchmove',touchmove );
 	window.onmouseup = function(){
 		window.onmousemove = old.mov; window.onmouseup = old.up;
+		window.removeEventListener('touchmove',touchmove);
+		window.removeEventListener('touchend',window.onmouseup);
 		elem.draggableOffsetX = undefined; 
 		elem.draggableOffsetY = undefined; 
 		elem.ontransformed({target: elem});
 	}
+	window.addEventListener('touchend',window.onmouseup);
 	//console.log(elem.draggableOffsetX +":"+ elem.draggableOffsetY);
 }
 
@@ -328,6 +338,7 @@ UI.draggable.getSnapCoords = function(elem, snapselectors){
 	console.log(clientRects);
 	return clientRects;
 }
+
 
 UI.draggable.mousemove = function(elem, e){
 	elem.style.left = (e.clientX - elem.draggableOffsetX) + "px";
@@ -710,8 +721,8 @@ UI.resizeable = function(element, verb, attrs){
 	
 	/** else **/
 	if (verb == "set" || verb == "both"){
-		if (window.getComputedStyle(element,null).getPropertyValue('overflow') == "")
-			element.style.overflow = "auto";
+//		if (window.getComputedStyle(element,null).getPropertyValue('overflow') == "")
+//			element.style.overflow = "auto";
 	
 		//element.style.resize = 'both';
 		var handle = lib.newEL('div', 
@@ -734,6 +745,12 @@ UI.resizeable = function(element, verb, attrs){
 			e.cancelBubble = true;
 			UI.resizeable.mousedown(element, e);
 		}
+		element.resizeHandle.addEventListener('touchstart',function(e){
+			console.log(e)
+			e.cancelBubble = true;
+			UI.resizeable.mousedown(element,e.touches[0])
+		});
+			
 	}
 
 	if (verb == "remove" || verb == "unset" || verb == "none"){
@@ -755,9 +772,14 @@ UI.resizeable.mousedown = function(elem, e){
 	var old = {};
 	old.mov = window.onmousemove;
 	old.up = window.onmouseup;
+	var touchmove = function(e2){UI.resizeable.mousemove(elem,e2.touches[0])};
 	window.onmousemove = function(e2){UI.resizeable.mousemove(elem,e2)};
+	window.addEventListener('touchmove',touchmove);
 	window.onmouseup = function(){
+		console.log('end resize');
 		window.onmousemove = old.mov; window.onmouseup = old.up;
+		window.removeEventListener('touchmove',touchmove);
+		window.removeEventListener('touchend',window.onmouseup);
 		elem.resizeableOffsetX = undefined; 
 		elem.resizeableOffsetY = undefined; 
 		elem.resizeableWidth = undefined; 
@@ -765,6 +787,7 @@ UI.resizeable.mousedown = function(elem, e){
 		elem.setAttribute('draggable','auto');
 		elem.ontransformed({target:elem});
 	}
+	window.addEventListener('touchend',window.onmouseup);
 	console.log(elem.draggableOffsetX +":"+ elem.draggableOffsetY);
 }
 
@@ -1336,8 +1359,10 @@ function addItemMenu(e){
 
 	if (e.target == active ){
 		remove_menu();
+		console.log(e);
 		lastClick.x = e.offsetX;
 		lastClick.y = e.offsetY;
+		console.log(lastClick);
 		var menu = document.createElement('div');
 		menu.setAttribute('class','menu');
 			var li = document.createElement("li");
@@ -1354,8 +1379,8 @@ function addItemMenu(e){
 			menu.appendChild(li);
 			e.target.appendChild(menu);
 		menu.style.position = "absolute";
-		menu.style.top = e.offsetY + "px";
-		menu.style.left = e.offsetX + "px";
+		menu.style.top = lastClick.y+ "px";
+		menu.style.left = lastClick.x + "px";
 		e.preventDefault();
 		e.returnValue = false;
 		active.addEventListener('click',remove_menu);
@@ -1532,8 +1557,9 @@ function Add_elem(type){
 			text.innerHTML = "";
 			textArea.appendChild(text);
 		active.appendChild(textArea);
-		textArea.style.top = lastClick.y + 'px';
-		textArea.style.left = lastClick.x + 'px';
+		console.log(lastClick);
+		textArea.style.top = (lastClick.y || 10 )+ 'px';
+		textArea.style.left = (lastClick.x || 10)+ 'px';
 		UI.resizeable(textArea,'set');
 		UI.draggable(textArea,'set',{cancel: '[contenteditable="true"]'});
 		textArea.ontransformed = boxDrag;
@@ -1548,8 +1574,7 @@ function Add_elem(type){
 		var body = document.createElement('div');
 			//textArea.setAttribute('id','outer' + ID_CT);
 			body.setAttribute('class','text_area slide-element-body');
-		var handle = document.createElement('div');
-			handle.setAttribute('class','handle');
+		var handle = lib.newEL('div',{className:'handle'});
 			body.appendChild(handle);
 		var img = document.createElement('div');
 				img.setAttribute('class','slide_text slide_img');
@@ -1558,8 +1583,8 @@ function Add_elem(type){
 		UI.draggable(body,'set');
 		body.ontransformed = boxDrag;
 
-		body.style.top = lastClick.clientY + 'px';
-		body.style.left = lastClick.clientX + 'px';
+		body.style.top = (lastClick.y||10) + 'px';
+		body.style.left =(lastClick.x||10) + 'px';
 		var image_preview = new Preview({type:'image'});
 		image_preview.onselected = function(file){
 			img.style.backgroundImage = 'url(' + URL.createObjectURL(file) + ')';
@@ -1595,8 +1620,8 @@ function Add_elem(type){
 	
 		UI.resizeable(textArea,'set');
 		UI.draggable(textArea,'set');
-		textArea.style.top = lastClick.clientY + 'px';
-		textArea.style.left = lastClick.clientX + 'px';
+		textArea.style.top = (lastClick.y||10) + 'px';
+		textArea.style.left = (lastClick.x||10) + 'px';
 		var image_preview = new Preview({type:'video'});
 		image_preview.onselected = function(file){
 			img.src = URL.createObjectURL(file)  ;

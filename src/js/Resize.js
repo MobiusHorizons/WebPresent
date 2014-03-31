@@ -7,8 +7,8 @@ UI.resizeable = function(element, verb, attrs){
 	
 	/** else **/
 	if (verb == "set" || verb == "both"){
-		if (window.getComputedStyle(element,null).getPropertyValue('overflow') == "")
-			element.style.overflow = "auto";
+//		if (window.getComputedStyle(element,null).getPropertyValue('overflow') == "")
+//			element.style.overflow = "auto";
 	
 		//element.style.resize = 'both';
 		var handle = lib.newEL('div', 
