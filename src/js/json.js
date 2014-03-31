@@ -149,8 +149,10 @@ function addItemMenu(e){
 
 	if (e.target == active ){
 		remove_menu();
+		console.log(e);
 		lastClick.x = e.offsetX;
 		lastClick.y = e.offsetY;
+		console.log(lastClick);
 		var menu = document.createElement('div');
 		menu.setAttribute('class','menu');
 			var li = document.createElement("li");
@@ -167,8 +169,8 @@ function addItemMenu(e){
 			menu.appendChild(li);
 			e.target.appendChild(menu);
 		menu.style.position = "absolute";
-		menu.style.top = e.offsetY + "px";
-		menu.style.left = e.offsetX + "px";
+		menu.style.top = lastClick.y+ "px";
+		menu.style.left = lastClick.x + "px";
 		e.preventDefault();
 		e.returnValue = false;
 		active.addEventListener('click',remove_menu);
@@ -345,8 +347,9 @@ function Add_elem(type){
 			text.innerHTML = "";
 			textArea.appendChild(text);
 		active.appendChild(textArea);
-		textArea.style.top = lastClick.y + 'px';
-		textArea.style.left = lastClick.x + 'px';
+		console.log(lastClick);
+		textArea.style.top = (lastClick.y || 10 )+ 'px';
+		textArea.style.left = (lastClick.x || 10)+ 'px';
 		UI.resizeable(textArea,'set');
 		UI.draggable(textArea,'set',{cancel: '[contenteditable="true"]'});
 		textArea.ontransformed = boxDrag;
@@ -361,8 +364,7 @@ function Add_elem(type){
 		var body = document.createElement('div');
 			//textArea.setAttribute('id','outer' + ID_CT);
 			body.setAttribute('class','text_area slide-element-body');
-		var handle = document.createElement('div');
-			handle.setAttribute('class','handle');
+		var handle = lib.newEL('div',{className:'handle'});
 			body.appendChild(handle);
 		var img = document.createElement('div');
 				img.setAttribute('class','slide_text slide_img');
@@ -371,8 +373,8 @@ function Add_elem(type){
 		UI.draggable(body,'set');
 		body.ontransformed = boxDrag;
 
-		body.style.top = lastClick.clientY + 'px';
-		body.style.left = lastClick.clientX + 'px';
+		body.style.top = (lastClick.y||10) + 'px';
+		body.style.left =(lastClick.x||10) + 'px';
 		var image_preview = new Preview({type:'image'});
 		image_preview.onselected = function(file){
 			img.style.backgroundImage = 'url(' + URL.createObjectURL(file) + ')';
@@ -408,8 +410,8 @@ function Add_elem(type){
 	
 		UI.resizeable(textArea,'set');
 		UI.draggable(textArea,'set');
-		textArea.style.top = lastClick.clientY + 'px';
-		textArea.style.left = lastClick.clientX + 'px';
+		textArea.style.top = (lastClick.y||10) + 'px';
+		textArea.style.left = (lastClick.x||10) + 'px';
 		var image_preview = new Preview({type:'video'});
 		image_preview.onselected = function(file){
 			img.src = URL.createObjectURL(file)  ;
