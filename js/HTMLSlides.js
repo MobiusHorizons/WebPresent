@@ -286,7 +286,7 @@ else var Blob = (function (view) {
 
 UI.draggable = function(elem, verb, attrs){
 	if (verb == 'set'){
-		elem.onmousedown = function(e){UI.draggable.mousedown(elem,e)};
+		elem.onmousedown = function(e){UI.draggable.mousedown(elem,attrs,e)};
 		elem.setAttribute('draggable','false'); // so we don't get drag and drop.
 	} 
 	if (verb == "unset" || verb == "remove" || verb == "none"){
@@ -294,7 +294,7 @@ UI.draggable = function(elem, verb, attrs){
 		elem.setAttribute('draggable','auto'); 
 	}
 }
-UI.draggable.mousedown = function(elem, e){
+UI.draggable.mousedown = function(elem,attrs, e){
 	elem.draggableOffsetX = e.clientX - elem.offsetLeft;
 	elem.draggableOffsetY = e.clientY - elem.offsetTop;
 	//console.log(e);
@@ -302,6 +302,9 @@ UI.draggable.mousedown = function(elem, e){
 	//console.log(elem.offsetLeft);
 	//console.log(elem.offsetTop);
 	var old = {};
+	if (attrs && attrs.cancel && lib.matches(e.target,attrs.cancel)){
+		return;
+	}
 	old.mov = window.onmousemove;
 	old.up = window.onmouseup;
 	window.onmousemove = function(e2){UI.draggable.mousemove(elem,e2)};
@@ -1312,7 +1315,7 @@ function setEdit(preview){
 	borders(true);
 	lib.foreach(active.children,function(child,i){
 		UI.resizeable(child,'set');
-		UI.draggable(child,'set');
+		UI.draggable(child,'set',{cancel: '[contenteditable="true"]'});
 		var ce = child.querySelector(".content-editable");
 			if(!!ce){
 				ce.setAttribute('contenteditable',true);
@@ -1532,7 +1535,7 @@ function Add_elem(type){
 		textArea.style.top = lastClick.y + 'px';
 		textArea.style.left = lastClick.x + 'px';
 		UI.resizeable(textArea,'set');
-		UI.draggable(textArea,'set');
+		UI.draggable(textArea,'set',{cancel: '[contenteditable="true"]'});
 		textArea.ontransformed = boxDrag;
 		boxDrag({target:textArea}); // save dimentions.
 		slide.add(textArea,'text',[]);
@@ -1833,30 +1836,36 @@ function addSlidePreview(s, preview){
 		setEdit();
 		previewRender(s.id)
 	});
+	active.addEventListener('keyup',function(e){
+		var event = new CustomEvent('updated');
+		e.target.parentNode.dispatchEvent(event);
+	});
 	active.addEventListener('updated',function(e){
 		console.log('updated ' + s.id);
 		if (slideshow.currentSlide.id == s.id){ // i am active
+			var target = e.srcElement || e.target;
 			// update slide;
 			if (sp.style.backgroundImage != active.style.backgroundImage){
 				sp.style.backgroundImage = active.style.backgroundImage;
 			}
 			console.log(e);
 			console.log(sp.children.length);
-			if (sp.children.length == active.children.length){ // created
-				var newEL = e.srcElement.cloneNode(true);
-				newEL.top    = e.srcElement.top;
-				newEL.left   = e.srcElement.left;
-				newEL.width  = e.srcElement.width;
-				newEL.height = e.srcElement.height;
-				e.srcElement.index = sp.children.length; 
+			console.log(active.children.length);
+			if (active.children.length > sp.children.length){ // created
+				var newEL = target.cloneNode(true);
+				newEL.top    = target.top;
+				newEL.left   = target.left;
+				newEL.width  = target.width;
+				newEL.height = target.height;
+				target.index = sp.children.length; 
 				sp.appendChild(newEL);
 			} else { // update
-				var newEL = e.srcElement.cloneNode(true);
-				newEL.top    = e.srcElement.top;
-				newEL.left   = e.srcElement.left;
-				newEL.width  = e.srcElement.width;
-				newEL.height = e.srcElement.height;
-				var idx = e.srcElement.index ; //|| 0; // fail silently
+				var newEL = target.cloneNode(true);
+				newEL.top    = target.top;
+				newEL.left   = target.left;
+				newEL.width  = target.width;
+				newEL.height = target.height;
+				var idx = target.index ; //|| 0; // fail silently
 				sp.removeChild(sp.children[idx]);
 				sp.insertBefore(newEL, sp.children[idx]);
 			}
@@ -1879,7 +1888,7 @@ function previewRender(id){
 		console.log('preview #'+i+", slide #"+slideshow.currentSlide.id);
 		if (slideshow.currentSlide.id == i){
 			console.log(el.overlay);
-			if (el.overlay && el.overlay.parentNode == el){
+			/*if (el.overlay && el.overlay.parentNode == el){
 				el.overlay.style.background = 'rgba(0,0,0,.5)';
 				el.overlay.style.backgroundImage = "-moz-element(#slide_main)";
 			} else {
@@ -1888,12 +1897,14 @@ function previewRender(id){
 				el.overlay.style.backgroundImage = "-moz-element(#slide_main)";
 				el.overlay.style.backgroundSize = "cover";
 				el.appendChild(el.overlay);
-			}
+			}*/
+			el.style.borderColor="white";
 		} else if (slideshow.slides.length > i){
-			if (el.overlay && el.overlay.parentNode == el){
+			/*if (el.overlay && el.overlay.parentNode == el){
 				el.removeChild(el.overlay);
 				el.overlay = undefined;
-			}
+			}*/
+			el.style.borderColor="";
 			if (el == el.parentNode.lastChild){ // don't override the new slide button
 				addSlidePreview({id: i},false);
 				el = collection[i];
@@ -2025,6 +2036,25 @@ function slideResize(s){
 			elem.setAttribute(n,v);
 		});
 		return elem;		
+	}
+
+	lib.matches = function(elem, selector){
+		if (elem.webkitMatchesSelector){
+			return elem.webkitMatchesSelector(selector);
+		}
+		else if (elem.mozMatchesSelector){
+			return elem.mozMatchesSelector(selector);
+		} else if (elem.msMatchesSelector){
+			return elem.msMatchesSelector(selector);
+		} else if (elem.matches){
+			return elem.matches(selector);
+		} else {
+			var collection = elem.parentNode.querySelectorAll(selector);
+			for ( var i = 0; i < collection.length; i ++){
+				if (collection[i] == elem) return true;
+			}
+			return false;
+		}
 	}
 
 	lib.newEL = function(type,object){
