@@ -64,9 +64,9 @@ UI.resizeable.mousedown = function(elem, e){
 	window.addEventListener('touchmove',touchmove);
 	window.onmouseup = function(){
 		console.log('end resize');
-		window.onmousemove = old.mov; window.onmouseup = old.up;
 		window.removeEventListener('touchmove',touchmove);
 		window.removeEventListener('touchend',window.onmouseup);
+		window.onmousemove = old.mov; window.onmouseup = old.up;
 		elem.resizeableOffsetX = undefined; 
 		elem.resizeableOffsetY = undefined; 
 		elem.resizeableWidth = undefined; 
