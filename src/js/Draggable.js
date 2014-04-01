@@ -36,9 +36,9 @@ UI.draggable.mousedown = function(elem,attrs, e){
 	var touchmove = function(e2){UI.draggable.mousemove(elem,e2.touches[0])}
 	window.addEventListener('touchmove',touchmove );
 	window.onmouseup = function(){
-		window.onmousemove = old.mov; window.onmouseup = old.up;
 		window.removeEventListener('touchmove',touchmove);
 		window.removeEventListener('touchend',window.onmouseup);
+		window.onmousemove = old.mov; window.onmouseup = old.up;
 		elem.draggableOffsetX = undefined; 
 		elem.draggableOffsetY = undefined; 
 		elem.ontransformed({target: elem});
