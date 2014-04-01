@@ -286,7 +286,11 @@ else var Blob = (function (view) {
 
 UI.draggable = function(elem, verb, attrs){
 	if (verb == 'set'){
-		elem.touchstart = function(e){e.preventDefault();UI.draggable.mousedown(elem,attrs,e.touches[0])};
+		elem.touchstart = function(e){
+			var event = e.touches[0];
+			event.preventDefault = e.preventDefault();
+			UI.draggable.mousedown(elem,attrs,event)
+		};
 		elem.onmousedown = function(e){UI.draggable.mousedown(elem,attrs,e)};
 		elem.addEventListener('touchstart',elem.touchstart);
 		elem.setAttribute('draggable','false'); // so we don't get drag and drop.
@@ -310,15 +314,16 @@ UI.draggable.mousedown = function(elem,attrs, e){
 	if (attrs && attrs.cancel && lib.matches(e.target,attrs.cancel)){
 		return;
 	}
+	e.preventDefault();
 	old.mov = window.onmousemove;
 	old.up = window.onmouseup;
 	window.onmousemove = function(e2){UI.draggable.mousemove(elem,e2)};
 	var touchmove = function(e2){UI.draggable.mousemove(elem,e2.touches[0])}
 	window.addEventListener('touchmove',touchmove );
 	window.onmouseup = function(){
-		window.onmousemove = old.mov; window.onmouseup = old.up;
 		window.removeEventListener('touchmove',touchmove);
 		window.removeEventListener('touchend',window.onmouseup);
+		window.onmousemove = old.mov; window.onmouseup = old.up;
 		elem.draggableOffsetX = undefined; 
 		elem.draggableOffsetY = undefined; 
 		elem.ontransformed({target: elem});
@@ -778,9 +783,9 @@ UI.resizeable.mousedown = function(elem, e){
 	window.addEventListener('touchmove',touchmove);
 	window.onmouseup = function(){
 		console.log('end resize');
-		window.onmousemove = old.mov; window.onmouseup = old.up;
 		window.removeEventListener('touchmove',touchmove);
 		window.removeEventListener('touchend',window.onmouseup);
+		window.onmousemove = old.mov; window.onmouseup = old.up;
 		elem.resizeableOffsetX = undefined; 
 		elem.resizeableOffsetY = undefined; 
 		elem.resizeableWidth = undefined; 
