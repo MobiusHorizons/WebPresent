@@ -8,13 +8,13 @@ UI.draggable = function(elem, verb, attrs){
 	if (verb == 'set'){
 		elem.touchstart = function(e){e.preventDefault();UI.draggable.mousedown(elem,attrs,e.touches[0])};
 		elem.onmousedown = function(e){UI.draggable.mousedown(elem,attrs,e)};
-		window.addEventListener('touchstart',elem.touchstart);
+		elem.addEventListener('touchstart',elem.touchstart);
 		elem.setAttribute('draggable','false'); // so we don't get drag and drop.
 	} 
 	if (verb == "unset" || verb == "remove" || verb == "none"){
 		elem.onmousedown = null;
 		if (elem.touchstart ){
-			window.removeEventListener('touchstart',elem.touchstart);
+			elem.removeEventListener('touchstart',elem.touchstart);
 		}
 		elem.setAttribute('draggable','auto'); 
 	}
