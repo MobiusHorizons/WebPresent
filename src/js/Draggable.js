@@ -8,7 +8,7 @@ UI.draggable = function(elem, verb, attrs){
 	if (verb == 'set'){
 		elem.touchstart = function(e){
 			var event = e.touches[0];
-			event.preventDefault = e.preventDefault();
+			event.preventDefault = function(){e.preventDefault()}
 			UI.draggable.mousedown(elem,attrs,event)
 		};
 		elem.onmousedown = function(e){UI.draggable.mousedown(elem,attrs,e)};
